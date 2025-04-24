@@ -20,7 +20,7 @@ impl Player {
     }
 }
 
-pub enum Piece {
+pub enum PieceType {
     Pawn,
     Knight,
     Bishop,
@@ -29,23 +29,35 @@ pub enum Piece {
     King,
 }
 
-impl Piece {
+impl PieceType {
     pub fn draw(&self) {
         match self {
-            Piece::Pawn => print!("♟︎"),
-            Piece::Knight => print!("♞"),
-            Piece::Bishop => print!("♝"),
-            Piece::Rook => print!("♜"),
-            Piece::Queen => print!("♛"),
-            Piece::King => print!("♚"),
+            PieceType::Pawn => print!("♟︎"),
+            PieceType::Knight => print!("♞"),
+            PieceType::Bishop => print!("♝"),
+            PieceType::Rook => print!("♜"),
+            PieceType::Queen => print!("♛"),
+            PieceType::King => print!("♚"),
         }
+    }
+}
+
+pub struct Piece {
+    typee: PieceType,
+    owner: Player,
+}
+
+impl Piece {
+    pub fn draw(&self) {
+        self.owner.draw_color_on();
+        self.typee.draw();
+        self.owner.draw_color_off();
     }
 }
 
 pub struct Tile {
     empty: bool, // not sure if this is a good idea, we could add another "empty" piece instead
     piece: Piece,
-    owner: Player,
 }
 
 impl Tile {
@@ -54,10 +66,7 @@ impl Tile {
             print!(" ");
             return
         }
-
-        self.owner.draw_color_on();
         self.piece.draw();
-        self.owner.draw_color_off();
     }
 }
 
@@ -71,84 +80,84 @@ impl Board {
         Board {
             board: [
                 [
-                    Tile { empty: false, piece: Piece::Rook,   owner: Player::B },
-                    Tile { empty: false, piece: Piece::Knight, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Bishop, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Queen,  owner: Player::B },
-                    Tile { empty: false, piece: Piece::King,   owner: Player::B },
-                    Tile { empty: false, piece: Piece::Bishop, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Knight, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Rook,   owner: Player::B },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Rook,   owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Knight, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Bishop, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Queen,  owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::King,   owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Bishop, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Knight, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Rook,   owner: Player::B } },
                 ],
                 [
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::B },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
                 ],
                 [
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
                 ],
                 [
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::B },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::B } },
                 ],
                 [
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
                 ],
                 [
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: true, piece: Piece::Pawn, owner: Player::A },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: true, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
                 ],
                 [
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Pawn, owner: Player::A },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Pawn, owner: Player::A } },
                 ],
                 [
-                    Tile { empty: false, piece: Piece::Rook,   owner: Player::A },
-                    Tile { empty: false, piece: Piece::Knight, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Bishop, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Queen,  owner: Player::A },
-                    Tile { empty: false, piece: Piece::King,   owner: Player::A },
-                    Tile { empty: false, piece: Piece::Bishop, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Knight, owner: Player::A },
-                    Tile { empty: false, piece: Piece::Rook,   owner: Player::A },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Rook,   owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Knight, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Bishop, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Queen,  owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::King,   owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Bishop, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Knight, owner: Player::A } },
+                    Tile { empty: false, piece: Piece { typee: PieceType::Rook,   owner: Player::A } },
                 ],
             ],
             players_turn: Player::A,
@@ -171,11 +180,15 @@ impl Board {
                 if tile.empty {
                     continue;
                 }
-                if tile.owner != self.players_turn {
+
+                let piece = &tile.piece;
+
+                if piece.owner != self.players_turn {
                     continue;
                 }
-                print!("available move: ");
-                tile.draw();
+
+                print!("available pieces: ");
+                piece.draw();
                 println!();
             }
         }

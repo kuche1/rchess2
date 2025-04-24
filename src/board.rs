@@ -1,5 +1,6 @@
 
 const BOARD_SIZE_USIZE: usize = 8;
+const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
 
 #[derive(PartialEq)]
 pub enum Player {
@@ -175,8 +176,8 @@ impl Board {
     }
 
     pub fn play_turn(&self) {
-        for lines in &self.board {
-            for tile in lines {
+        for (y_idx, lines) in self.board.iter().enumerate() {
+            for (x_idx, tile) in lines.iter().enumerate() {
                 if tile.empty {
                     continue;
                 }
@@ -187,10 +188,51 @@ impl Board {
                     continue;
                 }
 
-                print!("available pieces: ");
+                let available_moves =
+                    self.get_available_moves_for(
+                        &piece.typee,
+                        x_idx, y_idx,
+                        if piece.owner == Player::A { -1 } else { 1 }
+                    );
+
+                if available_moves.len() == 0 {
+                    continue;
+                }
+
+                print!("available moves for ");
                 piece.draw();
+                print!(":");
+
+                for movee in available_moves {
+                    let (x, y) = movee;
+                    print!(" x={},y={}", x, y);
+                }
                 println!();
             }
         }
+    }
+
+    pub fn get_available_moves_for(&self, piece_type: &PieceType, x_idx_usize: usize, y_idx_usize: usize, forward_y: isize) -> Vec<(usize, usize)> {
+        // let x_idx: isize = x_idx_usize.try_into().unwrap();
+        let y_idx: isize = y_idx_usize.try_into().unwrap();
+
+        let mut available_moves: Vec<(usize, usize)> = vec![];
+
+        match piece_type {
+            PieceType::Pawn => {
+                let new_y = y_idx + forward_y;
+                if (new_y >= 0) && (new_y < BOARD_SIZE_ISIZE) {
+                    available_moves.push((x_idx_usize, new_y.try_into().unwrap()));
+                }
+            },
+
+            PieceType::Knight => {},
+            PieceType::Bishop => {},
+            PieceType::Rook => {},
+            PieceType::Queen => {},
+            PieceType::King => {},
+        }
+
+        available_moves
     }
 }

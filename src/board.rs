@@ -212,7 +212,7 @@ impl Board {
         }
     }
 
-    pub fn get_available_moves_for(&self, piece_type: &PieceType, x_idx_usize: usize, y_idx_usize: usize, forward_y: isize) -> Vec<(usize, usize)> {
+    pub fn get_available_moves_for(&self, piece_type: &PieceType, x_idx_usize: usize, y_idx_usize: usize, forward_y: isize) -> Vec<(usize, usize)> { // TODO actually, we also need to pass the owner so that we can check if the pawn can move 2 moves forward
         // let x_idx: isize = x_idx_usize.try_into().unwrap();
         let y_idx: isize = y_idx_usize.try_into().unwrap();
 

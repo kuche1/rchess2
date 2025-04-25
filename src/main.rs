@@ -4,7 +4,7 @@ use board::Board;
 
 mod input;
 
-const ADDITIONAL_THINK_DEPTH: i32 = 3;
+const ADDITIONAL_THINK_DEPTH: i32 = 1; // 3
 
 fn main() {
     let mut board = Board::standard();

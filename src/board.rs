@@ -221,6 +221,13 @@ impl Board {
         }
     }
 
+    fn switch_to_next_players_turn(&mut self) {
+        self.players_turn = match self.players_turn {
+            Player::A => Player::B,
+            Player::B => Player::A,
+        }
+    }
+
     pub fn play_turn(&mut self, additional_think_depth: i32) {
         let mut best_move_score: Option<i32> = None;
         let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
@@ -243,10 +250,6 @@ impl Board {
                         x_idx, y_idx,
                     );
 
-                if available_moves.len() == 0 {
-                    continue;
-                }
-
                 // print!("available moves for ");
                 // piece.draw();
                 // print!(":");
@@ -254,21 +257,28 @@ impl Board {
                 for movee in available_moves {
                     let (x, y) = movee;
                     // print!(" x={},y={}", x, y);
+
+                    // println!("{}evaluating {},{}->{},{}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y);
                     
                     let mut virtual_board = self.clone();
                     virtual_board.commit_turn(x_idx, y_idx, x, y);
                     if additional_think_depth > 0 {
+                        virtual_board.switch_to_next_players_turn();
                         virtual_board.play_turn(additional_think_depth - 1);
                     }
-                    let score = virtual_board.evaluate_score(&piece.owner);
+                    let score = virtual_board.evaluate_score(&piece.owner); // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+
+                    // println!("{}move {},{}->{},{} evaluates to {}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y, score);
 
                     match best_move_score {
                         None => {
                             best_move_score = Some(score);
                             best_move = (x_idx, y_idx, x, y);
+                            // println!("{}this is my new fav move: first available", "    ".repeat(additional_think_depth as usize));
                         },
                         Some(val) => {
                             if val < score {
+                                // println!("{}this is my new fav move: old({}) < new({})", "    ".repeat(additional_think_depth as usize), val, score);
                                 best_move_score = Some(score);
                                 best_move = (x_idx, y_idx, x, y);
                             }
@@ -296,10 +306,7 @@ impl Board {
             self.commit_turn(fx, fy, tx, ty);
         }
 
-        self.players_turn = match self.players_turn {
-            Player::A => Player::B,
-            Player::B => Player::A,
-        }
+        self.switch_to_next_players_turn();
     }
 
     fn is_pos_valid(&self, x: usize, y: usize, forr: &Player) -> bool {
@@ -320,14 +327,7 @@ impl Board {
         if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
             return false;
         }
-
-        let tile = &self.board[y][x];
-
-        if tile.empty {
-            return true;
-        }
-
-        return false;
+        return self.board[y][x].empty;
     }
 
     fn is_pos_valid_for_attack_pawn_move(&self, x: usize, y: usize, owner: &Player) -> bool {
@@ -348,45 +348,51 @@ impl Board {
 
         let mut available_moves: Vec<(usize, usize)> = vec![];
 
-        'matchh: {
-            match piece.typee {
+        match piece.typee {
 
-                PieceType::Pawn => {
+            PieceType::Pawn => {
 
-                    let forward_y: isize = if piece.owner == Player::A { -1 } else { 1 };
+                let forward_y: isize = match piece.owner {
+                    Player::A => -1,
+                    Player::B => 1,
+                };
 
-                    // check if we can capture any enemy piece
+                // check if we can capture any enemy piece
 
-                    'pawn_attack: {
-                        // we're kinda duplicating code, but I hope that the compiler is going to take care of that
-                        let atk_y = match y_idx.checked_add_signed(forward_y) {
-                            Some(v) => v,
-                            None => break 'matchh,
-                        };
+                'pawn_attack: {
+                    // we're kinda duplicating code, but I hope that the compiler is going to take care of that
+                    let atk_y = match y_idx.checked_add_signed(forward_y) {
+                        Some(v) => v,
+                        None => break 'pawn_attack,
+                    };
 
-                        if self.is_pos_valid_for_attack_pawn_move(x_idx+1, atk_y, &piece.owner) {
-                            available_moves.push((x_idx+1, atk_y));
-                        }
-
-                        let atk_x: usize = match x_idx.checked_add_signed(-1) {
-                            Some(v) => v,
-                            None => break 'pawn_attack,
-                        };
-
-                        if self.is_pos_valid_for_attack_pawn_move(atk_x, atk_y, &piece.owner) {
-                            available_moves.push((atk_x, atk_y));
-                        }
+                    if self.is_pos_valid_for_attack_pawn_move(x_idx+1, atk_y, &piece.owner) {
+                        available_moves.push((x_idx+1, atk_y));
                     }
+
+                    let atk_x: usize = match x_idx.checked_add_signed(-1) {
+                        Some(v) => v,
+                        None => break 'pawn_attack,
+                    };
+
+                    if self.is_pos_valid_for_attack_pawn_move(atk_x, atk_y, &piece.owner) {
+                        available_moves.push((atk_x, atk_y));
+                    }
+                }
+
+                // just move
+
+                'pawn_move: {
 
                     // move forward once
 
                     let new_y = match y_idx.checked_add_signed(forward_y) {
                         Some(v) => v,
-                        None => break 'matchh,
+                        None => break 'pawn_move,
                     };
 
                     if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y) {
-                        break 'matchh;
+                        break 'pawn_move;
                     }
 
                     available_moves.push((x_idx, new_y));
@@ -396,58 +402,59 @@ impl Board {
 
                     let new_y = match new_y.checked_add_signed(forward_y) {
                         Some(v) => v,
-                        None => break 'matchh,
+                        None => break 'pawn_move,
                     };
 
                     if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y) {
-                        break 'matchh;
+                        break 'pawn_move;
                     }
 
                     available_moves.push((x_idx, new_y));
 
-                    // TODO9 en passant
-                },
+                }
 
-                PieceType::Knight => {
+                // TODO9 en passant
+            },
 
-                    for (ofs_x, ofs_y) in
-                        [
-                            (0-1, 0-2), // top left
-                            (0+1, 0-2), // top right
-                            (0-1, 0+2), // bot left
-                            (0+1, 0+2), // bot right
-                            (0-2, 0-1), // left top
-                            (0-2, 0+1), // left bot
-                            (0+2, 0-1), // right top
-                            (0+2, 0+1), // right bot
-                    ] {
-                        let dest_x = match x_idx.checked_add_signed(ofs_x) {
-                            Some(v) => v,
-                            None => continue,
-                        };
+            PieceType::Knight => {
 
-                        let dest_y = match y_idx.checked_add_signed(ofs_y) {
-                            Some(v) => v,
-                            None => continue,
-                        };
+                for (ofs_x, ofs_y) in
+                    [
+                        (0-1, 0-2), // top left
+                        (0+1, 0-2), // top right
+                        (0-1, 0+2), // bot left
+                        (0+1, 0+2), // bot right
+                        (0-2, 0-1), // left top
+                        (0-2, 0+1), // left bot
+                        (0+2, 0-1), // right top
+                        (0+2, 0+1), // right bot
+                ] {
+                    let dest_x = match x_idx.checked_add_signed(ofs_x) {
+                        Some(v) => v,
+                        None => continue,
+                    };
 
-                        if !self.is_pos_valid(dest_x, dest_y, &piece.owner) {
-                            continue;
-                        }
+                    let dest_y = match y_idx.checked_add_signed(ofs_y) {
+                        Some(v) => v,
+                        None => continue,
+                    };
 
-                        available_moves.push((dest_x, dest_y));
+                    if !self.is_pos_valid(dest_x, dest_y, &piece.owner) {
+                        continue;
                     }
 
-                },
+                    available_moves.push((dest_x, dest_y));
+                }
 
-                PieceType::Bishop => {}, // TODO0
+            },
 
-                PieceType::Rook => {}, // TODO0
+            PieceType::Bishop => {}, // TODO0
 
-                PieceType::Queen => {}, // TODO0
+            PieceType::Rook => {}, // TODO0
 
-                PieceType::King => {}, // TODO0
-            }
+            PieceType::Queen => {}, // TODO0
+
+            PieceType::King => {}, // TODO0
         }
 
         available_moves

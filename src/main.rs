@@ -19,7 +19,7 @@ const ADDITIONAL_THINK_BREADTH: i32 = 2;
 
 const ADDITIONAL_THINK_DEPTH: i32 = 2;
 // if a given virtual board has more score than the current, extend the breath by this much (but only once)
-// setting this to `x % 2 == 0` will keep ADDITIONAL_THINK_BREADTH's aggressiveness property
+// setting this to `x % 2 == 0` will keep ADDITIONAL_THINK_BREADTH's aggressiveness property # <<< not sure about this info anymore
 // setting this to `x % 2 == 1` will revert it
 // TODO1 we need to make this so that after it has been triggered it ignores moves that do nothing
 

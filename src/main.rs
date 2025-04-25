@@ -10,7 +10,7 @@ mod tile;
 
 use board::Board;
 
-const ADDITIONAL_THINK_DEPTH: i32 = 1; // 3
+const ADDITIONAL_THINK_DEPTH: i32 = 3; // TODO0 rename this to `BREADTH_FIRST_THINK_DEPTH` or something like that and give it value `x%2==1` so that it thinks about "how can my opponent respond to my move"
 
 fn main() {
     let mut board = Board::standard();

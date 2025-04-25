@@ -21,7 +21,7 @@ impl Player {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum PieceType {
     Pawn,
     Knight,
@@ -213,9 +213,15 @@ impl Board {
     fn commit_turn(&mut self, from_x: usize, from_y: usize, to_x: usize, to_y: usize) { // kinda stupid name
         self.board[to_y][to_x] = self.board[from_y][from_x].clone();
         self.board[from_y][from_x].empty = true;
+
+        if self.board[to_y][to_x].piece.typee == PieceType::Pawn {
+            if (to_y == 0) || (to_y == BOARD_SIZE_USIZE-1) { // no need to actually check the owner
+                self.board[to_y][to_x].piece.typee = PieceType::Queen;
+            }
+        }
     }
 
-    pub fn play_turn(&mut self) {
+    pub fn play_turn(&mut self, additional_think_depth: i32) {
         let mut best_move_score: Option<i32> = None;
         let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
 
@@ -251,6 +257,9 @@ impl Board {
                     
                     let mut virtual_board = self.clone();
                     virtual_board.commit_turn(x_idx, y_idx, x, y);
+                    if additional_think_depth > 0 {
+                        virtual_board.play_turn(additional_think_depth - 1);
+                    }
                     let score = virtual_board.evaluate_score(&piece.owner);
 
                     match best_move_score {
@@ -272,18 +281,18 @@ impl Board {
         }
 
         if best_move_score == None {
-            // fucking what to do ? draw ? yeah, seems reasonable TODO0
+            // fucking what to do ? draw ? yeah, seems reasonable TODO0(don't just fucking crash)
             panic!("draw");
         }
 
         {
             self.players_turn.draw_color_on();
-            print!("player ");
+            // print!("player ");
             self.players_turn.draw_color_off();
-            print!("plays ");
+            // print!("plays ");
 
             let (fx, fy, tx, ty) = best_move;
-            println!("{},{} -> {},{}", fx, fy, tx, ty);
+            // println!("{},{} -> {},{}", fx, fy, tx, ty);
             self.commit_turn(fx, fy, tx, ty);
         }
 
@@ -383,7 +392,7 @@ impl Board {
                     available_moves.push((x_idx, new_y));
 
                     // move forward twice (will only trigger if you can also move forward once)
-                    // TODO I actually need to fucking check if the position is right (the pawn has not moved)
+                    // TODO0 I actually need to fucking check if the position is right (the pawn has not moved)
 
                     let new_y = match new_y.checked_add_signed(forward_y) {
                         Some(v) => v,

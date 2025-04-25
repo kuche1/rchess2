@@ -178,7 +178,7 @@ impl Board {
     }
 
     // returns `true` if draw
-    pub fn play_turn(&mut self, additional_think_depth: i32) -> bool {
+    pub fn play_turn(&mut self, additional_think_breadth: i32) -> bool {
         let mut best_move_score: Option<i32> = None;
         let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
 
@@ -219,9 +219,9 @@ impl Board {
                             break 'score 0;
                         }
 
-                        if additional_think_depth > 0 {
+                        if additional_think_breadth > 0 {
                             virtual_board.switch_to_next_players_turn();
-                            if virtual_board.play_turn(additional_think_depth - 1) {
+                            if virtual_board.play_turn(additional_think_breadth - 1) {
                                 break 'score 0;
                             }
                         }

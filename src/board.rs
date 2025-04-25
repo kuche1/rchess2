@@ -225,9 +225,7 @@ impl Board {
         return tile.piece.owner != *forr;
     }
 
-    pub fn get_available_moves_for(&self, piece: &Piece, x_idx_usize: usize, y_idx_usize: usize) -> Vec<(usize, usize)> {
-        let x_idx: isize = x_idx_usize.try_into().unwrap();
-        let y_idx: isize = y_idx_usize.try_into().unwrap();
+    pub fn get_available_moves_for(&self, piece: &Piece, x_idx: usize, y_idx: usize) -> Vec<(usize, usize)> {
 
         let mut available_moves: Vec<(usize, usize)> = vec![];
 
@@ -240,67 +238,62 @@ impl Board {
 
                     // move forward once
 
-                    let new_y = y_idx + forward_y;
+                    let new_y = match y_idx.checked_add_signed(forward_y) {
+                        Some(v) => v,
+                        None => break 'matchh,
+                    };
 
-                    if (new_y < 0) || (new_y >= BOARD_SIZE_ISIZE) {
+                    if !self.is_pos_valid(x_idx, new_y, &piece.owner) {
                         break 'matchh;
                     }
 
-                    let new_y_usize: usize = new_y.try_into().unwrap();
-
-                    if !self.board[new_y_usize][x_idx_usize].empty {
-                        break 'matchh;
-                    }
-
-                    available_moves.push((x_idx_usize, new_y_usize));
+                    available_moves.push((x_idx, new_y));
 
                     // move forward twice (will only trigger if you can also move forward once)
+                    // TODO I actually need to fucking check if the position is right (the pawn has not moved)
 
-                    let new_y = new_y + forward_y;
+                    let new_y = match new_y.checked_add_signed(forward_y) {
+                        Some(v) => v,
+                        None => break 'matchh,
+                    };
 
-                    if (new_y < 0) || (new_y >= BOARD_SIZE_ISIZE) {
+                    if !self.is_pos_valid(x_idx, new_y, &piece.owner) {
                         break 'matchh;
                     }
 
-                    let new_y_usize: usize = new_y.try_into().unwrap();
-
-                    if !self.board[new_y_usize][x_idx_usize].empty {
-                        break 'matchh;
-                    }
-
-                    available_moves.push((x_idx_usize, new_y_usize));
+                    available_moves.push((x_idx, new_y));
 
                     // TODO0 en passant
                 },
 
                 PieceType::Knight => {
 
-                    for (dest_x, dest_y) in
+                    for (ofs_x, ofs_y) in
                         [
-                            (x_idx-1, y_idx-2), // top left
-                            (x_idx+1, y_idx-2), // top right
-                            (x_idx-1, y_idx+2), // bot left
-                            (x_idx+1, y_idx+2), // bot right
-                            (x_idx-2, y_idx-1), // left top
-                            (x_idx-2, y_idx+1), // left bot
-                            (x_idx+2, y_idx-1), // right top
-                            (x_idx+2, y_idx+1), // right bot
+                            (0-1, 0-2), // top left
+                            (0+1, 0-2), // top right
+                            (0-1, 0+2), // bot left
+                            (0+1, 0+2), // bot right
+                            (0-2, 0-1), // left top
+                            (0-2, 0+1), // left bot
+                            (0+2, 0-1), // right top
+                            (0+2, 0+1), // right bot
                     ] {
-                        let x: usize = match dest_x.try_into() {
-                            Ok(v) => v,
-                            Err(_e) => continue,
+                        let dest_x = match x_idx.checked_add_signed(ofs_x) {
+                            Some(v) => v,
+                            None => continue,
                         };
 
-                        let y: usize = match dest_y.try_into() {
-                            Ok(v) => v,
-                            Err(_e) => continue,
+                        let dest_y = match y_idx.checked_add_signed(ofs_y) {
+                            Some(v) => v,
+                            None => continue,
                         };
 
-                        if !self.is_pos_valid(x, y, &piece.owner) {
+                        if !self.is_pos_valid(dest_x, dest_y, &piece.owner) {
                             continue;
                         }
 
-                        available_moves.push((x, y));
+                        available_moves.push((dest_x, dest_y));
                     }
 
                 },

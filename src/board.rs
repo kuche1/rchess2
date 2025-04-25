@@ -212,10 +212,8 @@ impl Board {
     }
 
     pub fn get_available_moves_for(&self, piece: &Piece, x_idx_usize: usize, y_idx_usize: usize) -> Vec<(usize, usize)> {
-        // let x_idx: isize = x_idx_usize.try_into().unwrap();
+        let x_idx: isize = x_idx_usize.try_into().unwrap();
         let y_idx: isize = y_idx_usize.try_into().unwrap();
-
-        let forward_y: isize = if piece.owner == Player::A { -1 } else { 1 };
 
         let mut available_moves: Vec<(usize, usize)> = vec![];
 
@@ -223,6 +221,8 @@ impl Board {
             match piece.typee {
 
                 PieceType::Pawn => {
+
+                    let forward_y: isize = if piece.owner == Player::A { -1 } else { 1 };
 
                     // move forward once
 
@@ -255,9 +255,38 @@ impl Board {
                     }
 
                     available_moves.push((x_idx_usize, new_y_usize));
+
+                    // TODO0 en passant
                 },
 
-                PieceType::Knight => {},
+                PieceType::Knight => {
+
+                    for (dest_x, dest_y) in [(x_idx-1, y_idx-2), (x_idx+1, y_idx-2), (x_idx-1, y_idx+2), (x_idx+1, y_idx+2)] {
+                        let x: usize = match dest_x.try_into() {
+                            Ok(v) => v,
+                            Err(_e) => continue,
+                        };
+                        if x >= BOARD_SIZE_USIZE {
+                            continue;
+                        }
+
+                        let y: usize = match dest_y.try_into() {
+                            Ok(v) => v,
+                            Err(_e) => continue,
+                        };
+                        if y >= BOARD_SIZE_USIZE {
+                            continue;
+                        }
+
+                        if !self.board[y][x].empty {
+                            continue;
+                        }
+
+                        available_moves.push((x, y));
+                    }
+
+                },
+
                 PieceType::Bishop => {},
                 PieceType::Rook => {},
                 PieceType::Queen => {},

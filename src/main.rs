@@ -12,6 +12,7 @@ mod piece;
 mod tile;
 
 use board::Board;
+use player::Player;
 
 const ADDITIONAL_THINK_BREADTH: i32 = 2;
 // if the value is `x % 2 == 1`, the machine will think "how can my opponent respond to my move"
@@ -32,13 +33,18 @@ fn main() {
 
         input::enter();
 
-        let draw = board.play_turn(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
+        let winner = board.play_turn(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
 
         println!();
 
-        if draw {
+        if let Some(winner) = winner {
             board.draw();
-            println!("draw");
+            // println!("winner: {}", winner);
+            match winner {
+                None => println!("draw"),
+                Some(Player::A) => println!("winner: player a"),
+                Some(Player::B) => println!("winner: player b"),
+            }
             break;
         }
     }

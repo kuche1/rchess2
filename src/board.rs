@@ -12,6 +12,9 @@ const SCORE_IF_DRAW: i32 = -1;
 // however this makes the bots too cowardly and willing to throw
 // a game over a lost pawn
 
+const SCORE_IF_WIN: i32 = 1_000_000;
+const SCORE_IF_LOOSE: i32 = -1_000_000;
+
 type BoardPosition = [[Tile; BOARD_SIZE_USIZE]; BOARD_SIZE_USIZE];
 
 #[derive(Clone)]
@@ -144,10 +147,25 @@ impl Board {
         score
     }
 
-    // returns `true` if the game has ended (in a draw)
-    fn commit_turn(&mut self, from_x: usize, from_y: usize, to_x: usize, to_y: usize) -> bool { // kinda stupid name
+    // returns the winner of the game, or `None` if it's a draw
+    // None - nothing interesting
+    // Some(None) - draw
+    // Some(Player) - winner
+    fn commit_turn(&mut self, from_x: usize, from_y: usize, to_x: usize, to_y: usize) -> Option<Option<Player>> { // kinda stupid name
+        let mut taken_piece_was_king = false;
+
+        if let Some(piece) = &self.board[to_y][to_x].piece {
+            if piece.typee == PieceType::King {
+                taken_piece_was_king = true;
+            }
+        }
+
         self.board[to_y][to_x] = self.board[from_y][from_x].clone();
         self.board[from_y][from_x].piece = None;
+
+        if taken_piece_was_king {
+            return Some(Some(self.board[to_y][to_x].piece.as_ref().unwrap().owner.clone()));
+        }
 
         if self.already_played_positions.contains(&self.board) {
             //// vvv code to delete all pieces, but that's not really needed
@@ -156,7 +174,7 @@ impl Board {
             //         tile.piece = None;
             //     }
             // }
-            return true;
+            return Some(None);
         }
 
         let piece = self.board[to_y][to_x].piece.as_mut().unwrap();
@@ -171,7 +189,7 @@ impl Board {
 
         self.already_played_positions.push(self.board.clone());
 
-        return false;
+        return None;
     }
 
     fn switch_to_next_players_turn(&mut self) {
@@ -181,8 +199,7 @@ impl Board {
         }
     }
 
-    // returns `true` if draw
-    pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> bool {
+    pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
         let mut best_move_score: Option<i32> = None;
         let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
 
@@ -219,14 +236,35 @@ impl Board {
                     let draw = virtual_board.commit_turn(x_idx, y_idx, x, y);
 
                     let score = 'score: {
-                        if draw {
-                            break 'score SCORE_IF_DRAW;
+
+                        if let Some(winner) = draw {
+                            break 'score
+                                match winner {
+                                    None => SCORE_IF_DRAW,
+                                    Some(player) => {
+                                        if player == piece.owner {
+                                            SCORE_IF_WIN
+                                        }else{
+                                            SCORE_IF_LOOSE
+                                        }
+                                    },
+                                }
                         }
 
                         if additional_think_breadth > 0 {
                             virtual_board.switch_to_next_players_turn();
-                            if virtual_board.play_turn(additional_think_breadth - 1, 0) {
-                                break 'score SCORE_IF_DRAW;
+                            if let Some(winner) = virtual_board.play_turn(additional_think_breadth - 1, 0) {
+                                break 'score
+                                    match winner {
+                                        None => SCORE_IF_DRAW,
+                                        Some(player) => {
+                                            if player == piece.owner {
+                                                SCORE_IF_WIN
+                                            }else{
+                                                SCORE_IF_LOOSE
+                                            }
+                                        },
+                                    }
                             }
                         }
 
@@ -234,8 +272,18 @@ impl Board {
 
                         if additional_think_depth > 0 {
                             if score > self.evaluate_score(&piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
-                                if virtual_board.play_turn(additional_think_depth - 1, 0) {
-                                    break 'score SCORE_IF_DRAW;
+                                if let Some(winner) = virtual_board.play_turn(additional_think_depth - 1, 0) {
+                                    break 'score
+                                    match winner {
+                                        None => SCORE_IF_DRAW,
+                                        Some(player) => {
+                                            if player == piece.owner {
+                                                SCORE_IF_WIN
+                                            }else{
+                                                SCORE_IF_LOOSE
+                                            }
+                                        },
+                                    }
                                 }
                             }
                         }
@@ -266,26 +314,25 @@ impl Board {
         }
 
         if best_move_score == None {
-            // fucking what to do ? draw ? yeah, seems reasonable TODO1(don't just fucking crash)
-            panic!("draw");
+            return Some(None);
         }
 
         {
-            self.players_turn.draw_color_on();
+            // self.players_turn.draw_color_on();
             // print!("player ");
-            self.players_turn.draw_color_off();
+            // self.players_turn.draw_color_off();
             // print!("plays ");
 
             let (fx, fy, tx, ty) = best_move;
             // println!("{},{} -> {},{}", fx, fy, tx, ty);
-            if self.commit_turn(fx, fy, tx, ty) {
-                return true;
+            if let Some(winner) = self.commit_turn(fx, fy, tx, ty) {
+                return Some(winner);
             }
         }
 
-        self.switch_to_next_players_turn();
+        self.switch_to_next_players_turn(); // TODO0 this could be moved to `commit_turn`, but better do it tomorrow when i'm not tired
 
-        false
+        None
     }
 
     // first ret bool - true if the position is valid

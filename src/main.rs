@@ -1,6 +1,5 @@
 
-// TODO0 need some sort of mechanism for evaluating moves that have already happened, and if the same move is repeated 3 times the score is set to 0 (perhaps by clearing all figures?)
-// also I just realised that the engine CAN waste lots of time by recalculating already happened moves (say a knight moving back and forth)
+// TODO2? I need some sort of mechanism that gives the bots tunnel vision so that they don't just get depressed and give up as to not loose a piece
 
 mod board;
 mod input;
@@ -18,8 +17,17 @@ fn main() {
 
     loop {
         board.draw();
+
         input::enter();
-        board.play_turn(ADDITIONAL_THINK_DEPTH);
+
+        let draw = board.play_turn(ADDITIONAL_THINK_DEPTH);
+
         println!();
+
+        if draw {
+            board.draw();
+            println!("draw");
+            break;
+        }
     }
 }

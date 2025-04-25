@@ -7,11 +7,15 @@ use super::tile::Tile;
 const BOARD_SIZE_USIZE: usize = 8;
 // const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
 
+type BoardPosition = [[Tile; BOARD_SIZE_USIZE]; BOARD_SIZE_USIZE];
+
 #[derive(Clone)]
 pub struct Board {
-    board: [[Tile; BOARD_SIZE_USIZE]; BOARD_SIZE_USIZE],
+    board: BoardPosition,
     players_turn: Player,
     // TODO0 maybe make a `game` struct, put the board there, and have a vector "already played board", then clean that vector on every pawn move
+
+    already_played_positions: Vec<BoardPosition>, // assuming that `players_turn` doesnt relly matter
 }
 
 impl Board {
@@ -100,6 +104,7 @@ impl Board {
                 ],
             ],
             players_turn: Player::A,
+            already_played_positions: vec![],
         }
     }
 
@@ -135,17 +140,34 @@ impl Board {
         score
     }
 
-    fn commit_turn(&mut self, from_x: usize, from_y: usize, to_x: usize, to_y: usize) { // kinda stupid name
+    // returns `true` if the game has ended (in a draw)
+    fn commit_turn(&mut self, from_x: usize, from_y: usize, to_x: usize, to_y: usize) -> bool { // kinda stupid name
         self.board[to_y][to_x] = self.board[from_y][from_x].clone();
         self.board[from_y][from_x].piece = None;
+
+        if self.already_played_positions.contains(&self.board) {
+            //// vvv code to delete all pieces, but that's not really needed
+            // for line in &mut self.board {
+            //     for tile in line {
+            //         tile.piece = None;
+            //     }
+            // }
+            return true;
+        }
 
         let piece = self.board[to_y][to_x].piece.as_mut().unwrap();
 
         if piece.typee == PieceType::Pawn {
+            self.already_played_positions.clear(); // if a pawn has been played we know for sure that all previously recorded board cannot be repeated
+
             if (to_y == 0) || (to_y == BOARD_SIZE_USIZE-1) { // no need to actually check the owner
                 piece.typee = PieceType::Queen;
             }
         }
+
+        self.already_played_positions.push(self.board.clone());
+
+        return false;
     }
 
     fn switch_to_next_players_turn(&mut self) {
@@ -155,7 +177,8 @@ impl Board {
         }
     }
 
-    pub fn play_turn(&mut self, additional_think_depth: i32) {
+    // returns `true` if draw
+    pub fn play_turn(&mut self, additional_think_depth: i32) -> bool {
         let mut best_move_score: Option<i32> = None;
         let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
 
@@ -188,12 +211,23 @@ impl Board {
                     // println!("{}evaluating {},{}->{},{}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y);
                     
                     let mut virtual_board = self.clone();
-                    virtual_board.commit_turn(x_idx, y_idx, x, y);
-                    if additional_think_depth > 0 {
-                        virtual_board.switch_to_next_players_turn();
-                        virtual_board.play_turn(additional_think_depth - 1);
-                    }
-                    let score = virtual_board.evaluate_score(&piece.owner); // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+                
+                    let draw = virtual_board.commit_turn(x_idx, y_idx, x, y);
+
+                    let score = 'score: {
+                        if draw {
+                            break 'score 0;
+                        }
+
+                        if additional_think_depth > 0 {
+                            virtual_board.switch_to_next_players_turn();
+                            if virtual_board.play_turn(additional_think_depth - 1) {
+                                break 'score 0;
+                            }
+                        }
+
+                        virtual_board.evaluate_score(&piece.owner) // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+                    };
 
                     // println!("{}move {},{}->{},{} evaluates to {}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y, score);
 
@@ -230,10 +264,14 @@ impl Board {
 
             let (fx, fy, tx, ty) = best_move;
             // println!("{},{} -> {},{}", fx, fy, tx, ty);
-            self.commit_turn(fx, fy, tx, ty);
+            if self.commit_turn(fx, fy, tx, ty) {
+                return true;
+            }
         }
 
         self.switch_to_next_players_turn();
+
+        false
     }
 
     fn is_pos_valid(&self, x: usize, y: usize, forr: &Player) -> bool {

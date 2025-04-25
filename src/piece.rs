@@ -2,7 +2,7 @@
 use super::piece_type::PieceType;
 use super::player::Player;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Piece {
     pub typee: PieceType,
     pub owner: Player,

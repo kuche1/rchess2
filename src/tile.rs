@@ -1,7 +1,7 @@
 
 use super::piece::Piece;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub struct Tile {
     pub piece: Option<Piece>,
 }

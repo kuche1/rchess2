@@ -465,7 +465,34 @@ impl Board {
                 }
             },
 
-            PieceType::Rook => {}, // TODO0
+            PieceType::Rook => {
+                for (ofs_x, ofs_y) in [(0, -1), (-1, 0), (1, 0), (0, -1)] {
+                    let mut pos_x = x_idx;
+                    let mut pos_y = y_idx;
+
+                    loop {
+                        pos_x = match pos_x.checked_add_signed(ofs_x) {
+                            Some(v) => v,
+                            None => break,
+                        };
+                        pos_y = match pos_y.checked_add_signed(ofs_y) {
+                            Some(v) => v,
+                            None => break,
+                        };
+
+                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, &piece.owner);
+                        if !pos_is_valid {
+                            break;
+                        }
+
+                        available_moves.push((pos_x, pos_y));
+
+                        if piece_to_be_taken {
+                            break;
+                        }
+                    }
+                }
+            },
 
             PieceType::Queen => {}, // TODO0
 

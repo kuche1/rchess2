@@ -1,4 +1,6 @@
 
+// TODO0 must fucking finally implement something for when the king dies
+
 // run with:
 // cargo run --release
 

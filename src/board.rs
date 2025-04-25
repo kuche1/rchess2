@@ -211,6 +211,20 @@ impl Board {
         }
     }
 
+    fn is_pos_valid(&self, x: usize, y: usize, forr: &Player) -> bool {
+        if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
+            return false;
+        }
+
+        let tile = &self.board[y][x];
+
+        if tile.empty {
+            return true;
+        }
+
+        return tile.piece.owner != *forr;
+    }
+
     pub fn get_available_moves_for(&self, piece: &Piece, x_idx_usize: usize, y_idx_usize: usize) -> Vec<(usize, usize)> {
         let x_idx: isize = x_idx_usize.try_into().unwrap();
         let y_idx: isize = y_idx_usize.try_into().unwrap();
@@ -261,24 +275,28 @@ impl Board {
 
                 PieceType::Knight => {
 
-                    for (dest_x, dest_y) in [(x_idx-1, y_idx-2), (x_idx+1, y_idx-2), (x_idx-1, y_idx+2), (x_idx+1, y_idx+2)] {
+                    for (dest_x, dest_y) in
+                        [
+                            (x_idx-1, y_idx-2), // top left
+                            (x_idx+1, y_idx-2), // top right
+                            (x_idx-1, y_idx+2), // bot left
+                            (x_idx+1, y_idx+2), // bot right
+                            (x_idx-2, y_idx-1), // left top
+                            (x_idx-2, y_idx+1), // left bot
+                            (x_idx+2, y_idx-1), // right top
+                            (x_idx+2, y_idx+1), // right bot
+                    ] {
                         let x: usize = match dest_x.try_into() {
                             Ok(v) => v,
                             Err(_e) => continue,
                         };
-                        if x >= BOARD_SIZE_USIZE {
-                            continue;
-                        }
 
                         let y: usize = match dest_y.try_into() {
                             Ok(v) => v,
                             Err(_e) => continue,
                         };
-                        if y >= BOARD_SIZE_USIZE {
-                            continue;
-                        }
 
-                        if !self.board[y][x].empty {
+                        if !self.is_pos_valid(x, y, &piece.owner) {
                             continue;
                         }
 

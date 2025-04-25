@@ -178,7 +178,7 @@ impl Board {
     }
 
     // returns `true` if draw
-    pub fn play_turn(&mut self, additional_think_breadth: i32) -> bool {
+    pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> bool {
         let mut best_move_score: Option<i32> = None;
         let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
 
@@ -221,12 +221,20 @@ impl Board {
 
                         if additional_think_breadth > 0 {
                             virtual_board.switch_to_next_players_turn();
-                            if virtual_board.play_turn(additional_think_breadth - 1) {
+                            if virtual_board.play_turn(additional_think_breadth - 1, 0) {
                                 break 'score 0;
                             }
                         }
 
-                        virtual_board.evaluate_score(&piece.owner) // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+                        let score = virtual_board.evaluate_score(&piece.owner); // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+
+                        if score > self.evaluate_score(&piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
+                            if virtual_board.play_turn(additional_think_depth, 0) {
+                                break 'score 0;
+                            }
+                        }
+
+                        score
                     };
 
                     // println!("{}move {},{}->{},{} evaluates to {}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y, score);

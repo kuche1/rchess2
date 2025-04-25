@@ -1,88 +1,11 @@
 
+use super::player::Player;
+use super::piece_type::PieceType;
+use super::piece::Piece;
+use super::tile::Tile;
+
 const BOARD_SIZE_USIZE: usize = 8;
 // const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
-
-#[derive(PartialEq, Clone)]
-pub enum Player {
-    A,
-    B,
-}
-
-impl Player {
-    pub fn draw_color_on(&self) {
-        match self {
-            Player::A => print!("\x1b[38;2;{};{};{}m", 100, 255, 100),
-            Player::B => print!("\x1b[38;2;{};{};{}m", 255, 100, 100),
-        }
-    }
-
-    pub fn draw_color_off(&self) {
-        print!("\x1b[0;0m");
-    }
-}
-
-#[derive(Clone, PartialEq)]
-pub enum PieceType {
-    Pawn,
-    Knight,
-    Bishop,
-    Rook,
-    Queen,
-    King,
-}
-
-impl PieceType {
-    pub fn draw(&self) {
-        match self {
-            PieceType::Pawn => print!("♟︎"),
-            PieceType::Knight => print!("♞"),
-            PieceType::Bishop => print!("♝"),
-            PieceType::Rook => print!("♜"),
-            PieceType::Queen => print!("♛"),
-            PieceType::King => print!("♚"),
-        }
-    }
-
-    pub fn get_point_value(&self) -> i32 {
-        match self {
-            PieceType::Pawn => 1,
-            PieceType::Knight => 3,
-            PieceType::Bishop => 3,
-            PieceType::Rook => 5,
-            PieceType::Queen => 9,
-            PieceType::King => 200,
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct Piece {
-    typee: PieceType,
-    owner: Player,
-}
-
-impl Piece {
-    pub fn draw(&self) {
-        self.owner.draw_color_on();
-        self.typee.draw();
-        self.owner.draw_color_off();
-    }
-}
-
-#[derive(Clone)]
-pub struct Tile {
-    piece: Option<Piece>,
-}
-
-impl Tile {
-    pub fn draw(&self) {
-        if let Some(piece) = &self.piece {
-            piece.draw();
-        }else{
-            print!(" ");
-        }
-    }
-}
 
 #[derive(Clone)]
 pub struct Board {

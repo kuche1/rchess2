@@ -3,9 +3,13 @@
 // also I just realised that the engine CAN waste lots of time by recalculating already happened moves (say a knight moving back and forth)
 
 mod board;
-use board::Board;
-
 mod input;
+mod player;
+mod piece_type;
+mod piece;
+mod tile;
+
+use board::Board;
 
 const ADDITIONAL_THINK_DEPTH: i32 = 1; // 3
 

@@ -1,4 +1,7 @@
 
+// TODO0 need some sort of mechanism for evaluating moves that have already happened, and if the same move is repeated 3 times the score is set to 0 (perhaps by clearing all figures?)
+// also I just realised that the engine CAN waste lots of time by recalculating already happened moves (say a knight moving back and forth)
+
 mod board;
 use board::Board;
 

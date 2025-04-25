@@ -291,7 +291,7 @@ impl Board {
         }
 
         if best_move_score == None {
-            // fucking what to do ? draw ? yeah, seems reasonable TODO0(don't just fucking crash)
+            // fucking what to do ? draw ? yeah, seems reasonable TODO1(don't just fucking crash)
             panic!("draw");
         }
 
@@ -398,7 +398,7 @@ impl Board {
                     available_moves.push((x_idx, new_y));
 
                     // move forward twice (will only trigger if you can also move forward once)
-                    // TODO0 I actually need to fucking check if the position is right (the pawn has not moved)
+                    // TODO1 I actually need to fucking check if the position is right (the pawn has not moved)
 
                     let new_y = match new_y.checked_add_signed(forward_y) {
                         Some(v) => v,
@@ -454,7 +454,24 @@ impl Board {
 
             PieceType::Queen => {}, // TODO0
 
-            PieceType::King => {}, // TODO0
+            PieceType::King => {
+                for (ofs_x, ofs_y) in [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)] {
+                    let pos_x = match x_idx.checked_add_signed(ofs_x) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+                    let pos_y = match y_idx.checked_add_signed(ofs_y) {
+                        Some(v) => v,
+                        None => continue,
+                    };
+
+                    if !self.is_pos_valid(pos_x, pos_y, &piece.owner) {
+                        continue;
+                    }
+
+                    available_moves.push((pos_x, pos_y));
+                }
+            },
         }
 
         available_moves

@@ -307,7 +307,7 @@ impl Board {
         return tile.piece.owner != *forr;
     }
 
-    fn is_pos_valid_for_regular_pawn_move(&self, x: usize, y: usize, forr: &Player) -> bool {
+    fn is_pos_valid_for_regular_pawn_move(&self, x: usize, y: usize) -> bool {
         if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
             return false;
         }
@@ -339,7 +339,7 @@ impl Board {
                         None => break 'matchh,
                     };
 
-                    if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y, &piece.owner) {
+                    if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y) {
                         break 'matchh;
                     }
 
@@ -353,7 +353,7 @@ impl Board {
                         None => break 'matchh,
                     };
 
-                    if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y, &piece.owner) {
+                    if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y) {
                         break 'matchh;
                     }
 

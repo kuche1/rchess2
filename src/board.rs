@@ -227,9 +227,11 @@ impl Board {
 
                         let score = virtual_board.evaluate_score(&piece.owner); // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
 
-                        if score > self.evaluate_score(&piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
-                            if virtual_board.play_turn(additional_think_depth, 0) {
-                                break 'score 0;
+                        if additional_think_depth > 0 {
+                            if score > self.evaluate_score(&piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
+                                if virtual_board.play_turn(additional_think_depth - 1, 0) {
+                                    break 'score 0;
+                                }
                             }
                         }
 
@@ -281,29 +283,35 @@ impl Board {
         false
     }
 
-    fn is_pos_valid(&self, x: usize, y: usize, forr: &Player) -> bool {
+    // first ret bool - true if the position is valid
+    // second ret bool - true if an enemy piece is to be taken
+    fn is_pos_valid(&self, x: usize, y: usize, forr: &Player) -> (bool, bool) {
         if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
-            return false;
+            return (false, false);
         }
 
         let tile = &self.board[y][x];
 
         let piece = match &tile.piece {
-            None => return true,
+            None => return (true, false),
             Some(v) => v,
         };
 
-        return piece.owner != *forr;
+        if piece.owner == *forr {
+            return (false, false);
+        }
+
+        return (true, true);
     }
 
-    fn is_pos_valid_for_regular_pawn_move(&self, x: usize, y: usize) -> bool {
+    fn is_pos_valid_for_regular_pawn_move(&self, x: usize, y: usize) -> bool { // TODO2 perhaps we could now use the updated `is_pos_valid` instead of this
         if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
             return false;
         }
         return self.board[y][x].piece.is_none();
     }
 
-    fn is_pos_valid_for_attack_pawn_move(&self, x: usize, y: usize, owner: &Player) -> bool {
+    fn is_pos_valid_for_attack_pawn_move(&self, x: usize, y: usize, owner: &Player) -> bool { // TODO2 perhaps we could now use the updated `is_pos_valid` instead of this
         if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
             return false;
         }
@@ -413,7 +421,8 @@ impl Board {
                         None => continue,
                     };
 
-                    if !self.is_pos_valid(dest_x, dest_y, &piece.owner) {
+                    let (pos_is_valid, _take_piece) = self.is_pos_valid(dest_x, dest_y, &piece.owner);
+                    if !pos_is_valid {
                         continue;
                     }
 
@@ -422,7 +431,34 @@ impl Board {
 
             },
 
-            PieceType::Bishop => {}, // TODO0
+            PieceType::Bishop => {
+                for (ofs_x, ofs_y) in [(-1, -1), (1, -1), (-1, 1), (1, 1)] {
+                    let mut pos_x = x_idx;
+                    let mut pos_y = y_idx;
+
+                    loop {
+                        pos_x = match pos_x.checked_add_signed(ofs_x) {
+                            Some(v) => v,
+                            None => break,
+                        };
+                        pos_y = match pos_y.checked_add_signed(ofs_y) {
+                            Some(v) => v,
+                            None => break,
+                        };
+
+                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, &piece.owner);
+                        if !pos_is_valid {
+                            break;
+                        }
+
+                        available_moves.push((pos_x, pos_y));
+
+                        if piece_to_be_taken {
+                            break;
+                        }
+                    }
+                }
+            },
 
             PieceType::Rook => {}, // TODO0
 
@@ -439,7 +475,8 @@ impl Board {
                         None => continue,
                     };
 
-                    if !self.is_pos_valid(pos_x, pos_y, &piece.owner) {
+                    let (pos_is_valid, _piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, &piece.owner);
+                    if !pos_is_valid {
                         continue;
                     }
 

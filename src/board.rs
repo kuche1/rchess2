@@ -175,7 +175,7 @@ impl Board {
         }
     }
 
-    pub fn play_turn(&self) {
+    pub fn play_turn(&mut self) {
         for (y_idx, lines) in self.board.iter().enumerate() {
             for (x_idx, tile) in lines.iter().enumerate() {
                 if tile.empty {
@@ -208,6 +208,11 @@ impl Board {
                 }
                 println!();
             }
+        }
+
+        self.players_turn = match self.players_turn {
+            Player::A => Player::B,
+            Player::B => Player::A,
         }
     }
 

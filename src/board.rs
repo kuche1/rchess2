@@ -190,9 +190,8 @@ impl Board {
 
                 let available_moves =
                     self.get_available_moves_for(
-                        &piece.typee,
+                        piece,
                         x_idx, y_idx,
-                        if piece.owner == Player::A { -1 } else { 1 }
                     );
 
                 if available_moves.len() == 0 {
@@ -212,25 +211,58 @@ impl Board {
         }
     }
 
-    pub fn get_available_moves_for(&self, piece_type: &PieceType, x_idx_usize: usize, y_idx_usize: usize, forward_y: isize) -> Vec<(usize, usize)> { // TODO actually, we also need to pass the owner so that we can check if the pawn can move 2 moves forward
+    pub fn get_available_moves_for(&self, piece: &Piece, x_idx_usize: usize, y_idx_usize: usize) -> Vec<(usize, usize)> {
         // let x_idx: isize = x_idx_usize.try_into().unwrap();
         let y_idx: isize = y_idx_usize.try_into().unwrap();
 
+        let forward_y: isize = if piece.owner == Player::A { -1 } else { 1 };
+
         let mut available_moves: Vec<(usize, usize)> = vec![];
 
-        match piece_type {
-            PieceType::Pawn => {
-                let new_y = y_idx + forward_y;
-                if (new_y >= 0) && (new_y < BOARD_SIZE_ISIZE) {
-                    available_moves.push((x_idx_usize, new_y.try_into().unwrap()));
-                }
-            },
+        'matchh: {
+            match piece.typee {
 
-            PieceType::Knight => {},
-            PieceType::Bishop => {},
-            PieceType::Rook => {},
-            PieceType::Queen => {},
-            PieceType::King => {},
+                PieceType::Pawn => {
+
+                    // move forward once
+
+                    let new_y = y_idx + forward_y;
+
+                    if (new_y < 0) || (new_y >= BOARD_SIZE_ISIZE) {
+                        break 'matchh;
+                    }
+
+                    let new_y_usize: usize = new_y.try_into().unwrap();
+
+                    if !self.board[new_y_usize][x_idx_usize].empty {
+                        break 'matchh;
+                    }
+
+                    available_moves.push((x_idx_usize, new_y_usize));
+
+                    // move forward twice (will only trigger if you can also move forward once)
+
+                    let new_y = new_y + forward_y;
+
+                    if (new_y < 0) || (new_y >= BOARD_SIZE_ISIZE) {
+                        break 'matchh;
+                    }
+
+                    let new_y_usize: usize = new_y.try_into().unwrap();
+
+                    if !self.board[new_y_usize][x_idx_usize].empty {
+                        break 'matchh;
+                    }
+
+                    available_moves.push((x_idx_usize, new_y_usize));
+                },
+
+                PieceType::Knight => {},
+                PieceType::Bishop => {},
+                PieceType::Rook => {},
+                PieceType::Queen => {},
+                PieceType::King => {},
+            }
         }
 
         available_moves

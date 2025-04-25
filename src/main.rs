@@ -1,5 +1,5 @@
 
-// TODO0 must fucking finally implement something for when the king dies
+// TODO0 the bots are now wasting time on worthless moves
 
 // run with:
 // cargo run --release

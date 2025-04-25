@@ -1,6 +1,6 @@
 
 const BOARD_SIZE_USIZE: usize = 8;
-const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
+// const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
 
 #[derive(PartialEq)]
 pub enum Player {
@@ -263,7 +263,7 @@ impl Board {
 
                     available_moves.push((x_idx, new_y));
 
-                    // TODO0 en passant
+                    // TODO9 en passant
                 },
 
                 PieceType::Knight => {
@@ -298,10 +298,13 @@ impl Board {
 
                 },
 
-                PieceType::Bishop => {},
-                PieceType::Rook => {},
-                PieceType::Queen => {},
-                PieceType::King => {},
+                PieceType::Bishop => {}, // TODO0
+
+                PieceType::Rook => {}, // TODO0
+
+                PieceType::Queen => {}, // TODO0
+
+                PieceType::King => {}, // TODO0
             }
         }
 

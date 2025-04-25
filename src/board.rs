@@ -2,7 +2,7 @@
 const BOARD_SIZE_USIZE: usize = 8;
 // const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Player {
     A,
     B,
@@ -21,6 +21,7 @@ impl Player {
     }
 }
 
+#[derive(Clone)]
 pub enum PieceType {
     Pawn,
     Knight,
@@ -41,8 +42,20 @@ impl PieceType {
             PieceType::King => print!("♚"),
         }
     }
+
+    pub fn get_point_value(&self) -> i32 {
+        match self {
+            PieceType::Pawn => 1,
+            PieceType::Knight => 3,
+            PieceType::Bishop => 3,
+            PieceType::Rook => 5,
+            PieceType::Queen => 9,
+            PieceType::King => 200,
+        }
+    }
 }
 
+#[derive(Clone)]
 pub struct Piece {
     typee: PieceType,
     owner: Player,
@@ -56,6 +69,7 @@ impl Piece {
     }
 }
 
+#[derive(Clone)]
 pub struct Tile {
     empty: bool, // not sure if this is a good idea, we could add another "empty" piece instead
     piece: Piece,
@@ -71,6 +85,7 @@ impl Tile {
     }
 }
 
+#[derive(Clone)]
 pub struct Board {
     board: [[Tile; BOARD_SIZE_USIZE]; BOARD_SIZE_USIZE],
     players_turn: Player,
@@ -175,7 +190,35 @@ impl Board {
         }
     }
 
+    fn evaluate_score(&self, forr: &Player) -> i32 {
+        let mut score:i32 = 0;
+
+        for line in self.board.iter() {
+            for tile in line {
+                if tile.empty {
+                    continue;
+                }
+
+                if tile.piece.owner == *forr {
+                    score += tile.piece.typee.get_point_value();
+                }else{
+                    score -= tile.piece.typee.get_point_value();
+                }
+            }
+        }
+
+        score
+    }
+
+    fn commit_turn(&mut self, from_x: usize, from_y: usize, to_x: usize, to_y: usize) { // kinda stupid name
+        self.board[to_y][to_x] = self.board[from_y][from_x].clone();
+        self.board[from_y][from_x].empty = true;
+    }
+
     pub fn play_turn(&mut self) {
+        let mut best_move_score: Option<i32> = None;
+        let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
+
         for (y_idx, lines) in self.board.iter().enumerate() {
             for (x_idx, tile) in lines.iter().enumerate() {
                 if tile.empty {
@@ -198,16 +241,50 @@ impl Board {
                     continue;
                 }
 
-                print!("available moves for ");
-                piece.draw();
-                print!(":");
+                // print!("available moves for ");
+                // piece.draw();
+                // print!(":");
 
                 for movee in available_moves {
                     let (x, y) = movee;
-                    print!(" x={},y={}", x, y);
+                    // print!(" x={},y={}", x, y);
+                    
+                    let mut virtual_board = self.clone();
+                    virtual_board.commit_turn(x_idx, y_idx, x, y);
+                    let score = virtual_board.evaluate_score(&piece.owner);
+
+                    match best_move_score {
+                        None => {
+                            best_move_score = Some(score);
+                            best_move = (x_idx, y_idx, x, y);
+                        },
+                        Some(val) => {
+                            if val < score {
+                                best_move_score = Some(score);
+                                best_move = (x_idx, y_idx, x, y);
+                            }
+                        },
+                    }
+
                 }
-                println!();
+                // println!();
             }
+        }
+
+        if best_move_score == None {
+            // fucking what to do ? draw ? yeah, seems reasonable TODO0
+            panic!("draw");
+        }
+
+        {
+            self.players_turn.draw_color_on();
+            print!("player ");
+            self.players_turn.draw_color_off();
+            print!("plays ");
+
+            let (fx, fy, tx, ty) = best_move;
+            println!("{},{} -> {},{}", fx, fy, tx, ty);
+            self.commit_turn(fx, fy, tx, ty);
         }
 
         self.players_turn = match self.players_turn {
@@ -230,6 +307,20 @@ impl Board {
         return tile.piece.owner != *forr;
     }
 
+    fn is_pos_valid_for_regular_pawn_move(&self, x: usize, y: usize, forr: &Player) -> bool {
+        if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
+            return false;
+        }
+
+        let tile = &self.board[y][x];
+
+        if tile.empty {
+            return true;
+        }
+
+        return false;
+    }
+
     pub fn get_available_moves_for(&self, piece: &Piece, x_idx: usize, y_idx: usize) -> Vec<(usize, usize)> {
 
         let mut available_moves: Vec<(usize, usize)> = vec![];
@@ -248,7 +339,7 @@ impl Board {
                         None => break 'matchh,
                     };
 
-                    if !self.is_pos_valid(x_idx, new_y, &piece.owner) {
+                    if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y, &piece.owner) {
                         break 'matchh;
                     }
 
@@ -262,11 +353,13 @@ impl Board {
                         None => break 'matchh,
                     };
 
-                    if !self.is_pos_valid(x_idx, new_y, &piece.owner) {
+                    if !self.is_pos_valid_for_regular_pawn_move(x_idx, new_y, &piece.owner) {
                         break 'matchh;
                     }
 
                     available_moves.push((x_idx, new_y));
+
+                    // TODO check if can capture enemy piece
 
                     // TODO9 en passant
                 },

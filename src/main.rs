@@ -2,11 +2,15 @@
 mod board;
 use board::Board;
 
+mod input;
+
 fn main() {
     let mut board = Board::standard();
-    board.draw();
-    board.play_turn();
-    board.draw();
-    board.play_turn();
-    board.draw();
+
+    loop {
+        board.draw();
+        input::enter();
+        board.play_turn();
+        println!();
+    }
 }

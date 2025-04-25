@@ -16,7 +16,7 @@ const ADDITIONAL_THINK_BREADTH: i32 = 2;
 // if it is `x % 2 == 0`, it will be more aggressive, as it will not consider how the opponent might respond to it's last move
 // putting at least 1 is recommended so that the bot can expect "draw scumming" from the opponent
 
-const ADDITIONAL_THINK_DEPTH: i32 = 0;
+const ADDITIONAL_THINK_DEPTH: i32 = 2;
 // if a given virtual board has more score than the current, extend the breath by this much (but only once)
 // setting this to `x % 2 == 0` should keep ADDITIONAL_THINK_BREADTH's aggressiveness property
 // setting this to `x % 2 == 1` should invert it

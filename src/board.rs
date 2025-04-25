@@ -7,6 +7,11 @@ use super::tile::Tile;
 const BOARD_SIZE_USIZE: usize = 8;
 // const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
 
+const SCORE_IF_DRAW: i32 = -1;
+// it's logical that the score should be 0 if a draw occurs
+// however this makes the bots too cowardly and willing to throw
+// a game over a lost pawn
+
 type BoardPosition = [[Tile; BOARD_SIZE_USIZE]; BOARD_SIZE_USIZE];
 
 #[derive(Clone)]
@@ -215,13 +220,13 @@ impl Board {
 
                     let score = 'score: {
                         if draw {
-                            break 'score 0;
+                            break 'score SCORE_IF_DRAW;
                         }
 
                         if additional_think_breadth > 0 {
                             virtual_board.switch_to_next_players_turn();
                             if virtual_board.play_turn(additional_think_breadth - 1, 0) {
-                                break 'score 0;
+                                break 'score SCORE_IF_DRAW;
                             }
                         }
 
@@ -230,7 +235,7 @@ impl Board {
                         if additional_think_depth > 0 {
                             if score > self.evaluate_score(&piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
                                 if virtual_board.play_turn(additional_think_depth - 1, 0) {
-                                    break 'score 0;
+                                    break 'score SCORE_IF_DRAW;
                                 }
                             }
                         }

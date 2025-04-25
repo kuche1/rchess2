@@ -2,8 +2,6 @@
 // run with:
 // cargo run --release
 
-// TODO2? I need some sort of mechanism that gives the bots tunnel vision so that they don't just get depressed and give up as to not loose a piece
-
 mod board;
 mod input;
 mod player;

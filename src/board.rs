@@ -321,6 +321,20 @@ impl Board {
         return false;
     }
 
+    fn is_pos_valid_for_attack_pawn_move(&self, x: usize, y: usize, owner: &Player) -> bool {
+        if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
+            return false;
+        }
+
+        let tile = &self.board[y][x];
+
+        if tile.empty {
+            return false;
+        }
+
+        return tile.piece.owner != *owner;
+    }
+
     pub fn get_available_moves_for(&self, piece: &Piece, x_idx: usize, y_idx: usize) -> Vec<(usize, usize)> {
 
         let mut available_moves: Vec<(usize, usize)> = vec![];
@@ -331,6 +345,29 @@ impl Board {
                 PieceType::Pawn => {
 
                     let forward_y: isize = if piece.owner == Player::A { -1 } else { 1 };
+
+                    // check if we can capture any enemy piece
+
+                    'pawn_attack: {
+                        // we're kinda duplicating code, but I hope that the compiler is going to take care of that
+                        let atk_y = match y_idx.checked_add_signed(forward_y) {
+                            Some(v) => v,
+                            None => break 'matchh,
+                        };
+
+                        if self.is_pos_valid_for_attack_pawn_move(x_idx+1, atk_y, &piece.owner) {
+                            available_moves.push((x_idx+1, atk_y));
+                        }
+
+                        let atk_x: usize = match x_idx.checked_add_signed(-1) {
+                            Some(v) => v,
+                            None => break 'pawn_attack,
+                        };
+
+                        if self.is_pos_valid_for_attack_pawn_move(atk_x, atk_y, &piece.owner) {
+                            available_moves.push((atk_x, atk_y));
+                        }
+                    }
 
                     // move forward once
 
@@ -358,8 +395,6 @@ impl Board {
                     }
 
                     available_moves.push((x_idx, new_y));
-
-                    // TODO check if can capture enemy piece
 
                     // TODO9 en passant
                 },

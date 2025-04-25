@@ -13,7 +13,6 @@ type BoardPosition = [[Tile; BOARD_SIZE_USIZE]; BOARD_SIZE_USIZE];
 pub struct Board {
     board: BoardPosition,
     players_turn: Player,
-    // TODO0 maybe make a `game` struct, put the board there, and have a vector "already played board", then clean that vector on every pawn move
 
     already_played_positions: Vec<BoardPosition>, // assuming that `players_turn` doesnt relly matter
 }

@@ -1,8 +1,6 @@
 
 // TODO0 the bots are now wasting time on worthless moves
 
-// TODO0 replace all instances of `&Player` with just `Player` - it's an enum after all
-
 // run with:
 // cargo run --release
 

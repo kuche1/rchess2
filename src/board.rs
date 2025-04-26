@@ -1,8 +1,4 @@
 
-// use rand::seq::SliceRandom; // cargo add rand
-// use rand::thread_rng;
-// use rand; // cargo add rand
-// use rand::seq::SliceRandom;
 use rand::seq::IndexedRandom; // cargo add rand
 
 use super::player::Player;

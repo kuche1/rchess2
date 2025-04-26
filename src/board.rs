@@ -189,6 +189,8 @@ impl Board {
 
         self.already_played_positions.push(self.board.clone());
 
+        self.switch_to_next_players_turn();
+
         return None;
     }
 
@@ -252,7 +254,6 @@ impl Board {
                         }
 
                         if additional_think_breadth > 0 {
-                            virtual_board.switch_to_next_players_turn();
                             if let Some(winner) = virtual_board.play_turn(additional_think_breadth - 1, 0) {
                                 break 'score
                                     match winner {
@@ -329,8 +330,6 @@ impl Board {
                 return Some(winner);
             }
         }
-
-        self.switch_to_next_players_turn(); // TODO0 this could be moved to `commit_turn`, but better do it tomorrow when i'm not tired
 
         None
     }

@@ -1,4 +1,10 @@
 
+// use rand::seq::SliceRandom; // cargo add rand
+// use rand::thread_rng;
+// use rand; // cargo add rand
+// use rand::seq::SliceRandom;
+use rand::seq::IndexedRandom; // cargo add rand
+
 use super::player::Player;
 use super::piece_type::PieceType;
 use super::piece::Piece;
@@ -203,7 +209,8 @@ impl Board {
 
     pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
         let mut best_move_score: Option<i32> = None;
-        let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
+        // let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
+        let mut best_moves: Vec<(usize, usize, usize, usize)> = vec![];
 
         for (y_idx, lines) in self.board.iter().enumerate() {
             for (x_idx, tile) in lines.iter().enumerate() {
@@ -297,14 +304,18 @@ impl Board {
                     match best_move_score {
                         None => {
                             best_move_score = Some(score);
-                            best_move = (x_idx, y_idx, x, y);
+                            best_moves.push((x_idx, y_idx, x, y));
                             // println!("{}this is my new fav move: first available", "    ".repeat(additional_think_depth as usize));
                         },
                         Some(val) => {
                             if val < score {
                                 // println!("{}this is my new fav move: old({}) < new({})", "    ".repeat(additional_think_depth as usize), val, score);
                                 best_move_score = Some(score);
-                                best_move = (x_idx, y_idx, x, y);
+                                // best_move = (x_idx, y_idx, x, y);
+                                best_moves.clear();
+                                best_moves.push((x_idx, y_idx, x, y));
+                            }else if val == score {
+                                best_moves.push((x_idx, y_idx, x, y));
                             }
                         },
                     }
@@ -324,9 +335,9 @@ impl Board {
             // self.players_turn.draw_color_off();
             // print!("plays ");
 
-            let (fx, fy, tx, ty) = best_move;
+            let (fx, fy, tx, ty) = best_moves.choose(&mut rand::rng()).unwrap();
             // println!("{},{} -> {},{}", fx, fy, tx, ty);
-            if let Some(winner) = self.commit_turn(fx, fy, tx, ty) {
+            if let Some(winner) = self.commit_turn(*fx, *fy, *tx, *ty) {
                 return Some(winner);
             }
         }

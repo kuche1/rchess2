@@ -125,7 +125,7 @@ impl Board {
         }
     }
 
-    fn evaluate_score(&self, forr: &Player) -> i32 {
+    fn evaluate_score(&self, forr: Player) -> i32 {
         let mut score:i32 = 0;
 
         for line in self.board.iter() {
@@ -136,7 +136,7 @@ impl Board {
                     Some(v) => v,
                 };
 
-                if piece.owner == *forr {
+                if piece.owner == forr {
                     score += piece.typee.get_point_value();
                 }else{
                     score -= piece.typee.get_point_value();
@@ -164,7 +164,7 @@ impl Board {
         self.board[from_y][from_x].piece = None;
 
         if taken_piece_was_king {
-            return Some(Some(self.board[to_y][to_x].piece.as_ref().unwrap().owner.clone()));
+            return Some(Some(self.board[to_y][to_x].piece.as_ref().unwrap().owner));
         }
 
         if self.already_played_positions.contains(&self.board) {
@@ -268,10 +268,10 @@ impl Board {
                             }
                         }
 
-                        let score = virtual_board.evaluate_score(&piece.owner); // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+                        let score = virtual_board.evaluate_score(piece.owner); // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
 
                         if additional_think_depth > 0 {
-                            if score > self.evaluate_score(&piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
+                            if score > self.evaluate_score(piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
                                 if let Some(winner) = virtual_board.play_turn(additional_think_depth - 1, 0) {
                                     break 'score
                                     match winner {
@@ -337,7 +337,7 @@ impl Board {
 
     // first ret bool - true if the position is valid
     // second ret bool - true if an enemy piece is to be taken
-    fn is_pos_valid(&self, x: usize, y: usize, forr: &Player) -> (bool, bool) {
+    fn is_pos_valid(&self, x: usize, y: usize, forr: Player) -> (bool, bool) {
         if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
             return (false, false);
         }
@@ -349,7 +349,7 @@ impl Board {
             Some(v) => v,
         };
 
-        if piece.owner == *forr {
+        if piece.owner == forr {
             return (false, false);
         }
 
@@ -473,7 +473,7 @@ impl Board {
                         None => continue,
                     };
 
-                    let (pos_is_valid, _take_piece) = self.is_pos_valid(dest_x, dest_y, &piece.owner);
+                    let (pos_is_valid, _take_piece) = self.is_pos_valid(dest_x, dest_y, piece.owner);
                     if !pos_is_valid {
                         continue;
                     }
@@ -498,7 +498,7 @@ impl Board {
                             None => break,
                         };
 
-                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, &piece.owner);
+                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, piece.owner);
                         if !pos_is_valid {
                             break;
                         }
@@ -527,7 +527,7 @@ impl Board {
                             None => break,
                         };
 
-                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, &piece.owner);
+                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, piece.owner);
                         if !pos_is_valid {
                             break;
                         }
@@ -556,7 +556,7 @@ impl Board {
                             None => break,
                         };
 
-                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, &piece.owner);
+                        let (pos_is_valid, piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, piece.owner);
                         if !pos_is_valid {
                             break;
                         }
@@ -581,7 +581,7 @@ impl Board {
                         None => continue,
                     };
 
-                    let (pos_is_valid, _piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, &piece.owner);
+                    let (pos_is_valid, _piece_to_be_taken) = self.is_pos_valid(pos_x, pos_y, piece.owner);
                     if !pos_is_valid {
                         continue;
                     }

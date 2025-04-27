@@ -23,7 +23,7 @@ pub fn game_choice() -> GameChoice {
         let line = line.trim();
 
         match line {
-            "ai" => return GameChoice::NextTurnAi,
+            "ai" | "" => return GameChoice::NextTurnAi,
             "move" => return GameChoice::MovePiece,
             _ => println!("invalid choice"),
         }

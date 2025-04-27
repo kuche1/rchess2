@@ -364,7 +364,7 @@ impl Board {
                 } else { // the difference is that this one is not multithreaded
 
                     lines
-                    .iter() // TODO9 I really hate the fact that we have the exact same code in 2 places, with this being the only difference, but I don't think there is anything I can do // TODO0 actually, what if I just bind it to a function, then call that function
+                    .iter() // TODO9 I really hate the fact that we have the exact same code in 2 places, with this being the only difference, but I don't think there is anything I can do // note: I did try to assign the appropriate iter function to a variable then call it, but rust didn't let me
                     .enumerate()
                     .map( |(x_idx, tile)| self.calc_move_score(&tile.piece, x_idx, y_idx, additional_think_breadth, additional_think_depth))
                     .collect()

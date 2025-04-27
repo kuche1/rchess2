@@ -618,7 +618,7 @@ impl Board {
             },
 
             PieceType::Rook => {
-                for (ofs_x, ofs_y) in [(0, -1), (-1, 0), (1, 0), (0, -1)] {
+                for (ofs_x, ofs_y) in [(0, -1), (-1, 0), (1, 0), (0, 1)] {
                     let mut pos_x = x_idx;
                     let mut pos_y = y_idx;
 

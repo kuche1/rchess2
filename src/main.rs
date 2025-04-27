@@ -18,16 +18,19 @@ use player::Player;
 // then picks the onces that result in the most points
 // then picks a random one out of them
 
-const ADDITIONAL_THINK_BREADTH: i32 = 1;
-// if the value is `x % 2 == 1`, the machine will think "how can my opponent respond to my move"
-// if it is `x % 2 == 0`, it will be more aggressive, as it will not consider how the opponent might respond to it's last move
-// putting at least 1 is recommended so that the bot can expect "draw scumming" from the opponent
+const ADDITIONAL_THINK_BREADTH: i32 = 2;
+// the machine will consider all available positions for it's next turn
+// if this is 1, then it will consider all of the opponent's responses to each of the available turns
+// if this is 2, then it will consoder all avaiable ...
+//
+// therefore a value that is `% 2 == 0` should make the AI more aggressive
 
-const ADDITIONAL_THINK_DEPTH: i32 = 3;
-// if a given virtual board has more score than the current, extend the breath by this much (but only once)
-// setting this to `x % 2 == 0` should keep ADDITIONAL_THINK_BREADTH's aggressiveness property
-// setting this to `x % 2 == 1` should invert it
-// TODO1 we need to make this so that after it has been triggered it ignores moves that do nothing
+const ADDITIONAL_THINK_DEPTH: i32 = 4;
+// after considering all moves (`ADDITIONAL_THINK_BREADTH`), the machine will be permitted continue to think about the moves that have generated a positive change in score
+// if this is 1, it will think "how can my opponent respond in a way that increases the score for him"
+// if this is 2, it will think "how can I respond to my opponent's response, in a way that increases the score for me"
+//
+// therefor a value that is `% 2 == 0` should keep `ADDITIONAL_THINK_BREADTH`'s agressiveness value, otherwise it should inverse it
 
 fn main() {
     let mut board = Board::standard();
@@ -37,7 +40,7 @@ fn main() {
 
         input::enter();
 
-        let winner = board.play_turn(true, ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
+        let winner = board.play_turn(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
 
         println!();
 

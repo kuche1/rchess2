@@ -24,6 +24,7 @@ pub struct Board {
     board: BoardPosition,
     players_turn: Player,
 
+    non_virtual_board: bool,
     already_played_positions: Vec<BoardPosition>, // assuming that `players_turn` doesnt relly matter
 }
 
@@ -113,6 +114,7 @@ impl Board {
                 ],
             ],
             players_turn: Player::A,
+            non_virtual_board: true,
             already_played_positions: vec![],
         }
     }
@@ -157,6 +159,12 @@ impl Board {
         let mut taken_piece_was_king = false;
 
         if let Some(piece) = &self.board[to_y][to_x].piece {
+            if self.non_virtual_board {
+                print!("captured piece: ");
+                piece.draw();
+                println!();
+            }
+
             if piece.typee == PieceType::King {
                 taken_piece_was_king = true;
             }
@@ -203,7 +211,7 @@ impl Board {
         }
     }
 
-    pub fn play_turn(&mut self, real_call: bool, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
+    pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
         let mut best_move_score: Option<i32> = None;
         // let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
         let mut best_moves: Vec<(usize, usize, usize, usize)> = vec![];
@@ -237,6 +245,7 @@ impl Board {
                     // println!("{}evaluating {},{}->{},{}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y);
                     
                     let mut virtual_board = self.clone();
+                    virtual_board.non_virtual_board = false;
                 
                     let draw = virtual_board.commit_turn(x_idx, y_idx, x, y);
 
@@ -257,7 +266,7 @@ impl Board {
                         }
 
                         if additional_think_breadth > 0 {
-                            if let Some(winner) = virtual_board.play_turn(false, additional_think_breadth - 1, 0) {
+                            if let Some(winner) = virtual_board.play_turn(additional_think_breadth - 1, 0) {
                                 break 'score
                                     match winner {
                                         None => SCORE_IF_DRAW,
@@ -276,7 +285,7 @@ impl Board {
 
                         if additional_think_depth > 0 {
                             if score > self.evaluate_score(piece.owner) { // TODO2 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
-                                if let Some(winner) = virtual_board.play_turn(false, additional_think_depth - 1, 0) {
+                                if let Some(winner) = virtual_board.play_turn(0, additional_think_depth - 1) {
                                     break 'score
                                     match winner {
                                         None => SCORE_IF_DRAW,
@@ -321,21 +330,26 @@ impl Board {
             }
         }
 
-        if best_move_score == None {
-            return Some(None);
-        }
+        let best_move_score = match best_move_score {
+            None => return Some(None),
+            Some(v) => v,
+        };
 
         {
             let (fx, fy, tx, ty) = best_moves.choose(&mut rand::rng()).unwrap();
             let (fx, fy, tx, ty) = (*fx, *fy, *tx, *ty);
 
-            if real_call {
+            if self.non_virtual_board {
                 self.players_turn.draw_color_on();
                 print!("player ");
                 self.players_turn.draw_color_off();
                 print!("plays ");
                 self.board[fy][fx].draw();
                 println!(" => {},{}->{},{}", fx, fy, tx, ty);
+
+                for (fx, fy, tx, ty) in best_moves {
+                    println!("best available moves score: {} => {},{}->{},{}", best_move_score, fx, fy, tx, ty);
+                }
             }
 
             if let Some(winner) = self.commit_turn(fx, fy, tx, ty) {

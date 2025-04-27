@@ -203,7 +203,7 @@ impl Board {
         }
     }
 
-    pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
+    pub fn play_turn(&mut self, real_call: bool, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
         let mut best_move_score: Option<i32> = None;
         // let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
         let mut best_moves: Vec<(usize, usize, usize, usize)> = vec![];
@@ -257,7 +257,7 @@ impl Board {
                         }
 
                         if additional_think_breadth > 0 {
-                            if let Some(winner) = virtual_board.play_turn(additional_think_breadth - 1, 0) {
+                            if let Some(winner) = virtual_board.play_turn(false, additional_think_breadth - 1, 0) {
                                 break 'score
                                     match winner {
                                         None => SCORE_IF_DRAW,
@@ -276,7 +276,7 @@ impl Board {
 
                         if additional_think_depth > 0 {
                             if score > self.evaluate_score(piece.owner) { // TODO2 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
-                                if let Some(winner) = virtual_board.play_turn(additional_think_depth - 1, 0) {
+                                if let Some(winner) = virtual_board.play_turn(false, additional_think_depth - 1, 0) {
                                     break 'score
                                     match winner {
                                         None => SCORE_IF_DRAW,
@@ -326,14 +326,19 @@ impl Board {
         }
 
         {
-            // self.players_turn.draw_color_on();
-            // print!("player ");
-            // self.players_turn.draw_color_off();
-            // print!("plays ");
-
             let (fx, fy, tx, ty) = best_moves.choose(&mut rand::rng()).unwrap();
-            // println!("{},{} -> {},{}", fx, fy, tx, ty);
-            if let Some(winner) = self.commit_turn(*fx, *fy, *tx, *ty) {
+            let (fx, fy, tx, ty) = (*fx, *fy, *tx, *ty);
+
+            if real_call {
+                self.players_turn.draw_color_on();
+                print!("player ");
+                self.players_turn.draw_color_off();
+                print!("plays ");
+                self.board[fy][fx].draw();
+                println!(" => {},{}->{},{}", fx, fy, tx, ty);
+            }
+
+            if let Some(winner) = self.commit_turn(fx, fy, tx, ty) {
                 return Some(winner);
             }
         }

@@ -216,17 +216,18 @@ impl Board {
         let mut best_move_score: Option<i32> = None;
         let mut best_moves: Vec<(usize, usize, usize, usize)> = vec![];
 
-        // for (y_idx, lines) in self.board.iter().enumerate() { // sequantial
-        self.board.iter().enumerate().for_each(|(y_idx, lines)| { // parallel (WIP)
-            for (x_idx, tile) in lines.iter().enumerate() {
+        for (y_idx, lines) in self.board.iter().enumerate() {
+        // self.board.iter().enumerate().for_each(|(y_idx, lines)| {
+            // for (x_idx, tile) in lines.iter().enumerate() { // sequantial
+            lines.iter().enumerate().for_each( |(x_idx, tile)| { // parallel (WIP)
 
-                let piece = match &tile.piece {
-                    None => continue,
+                let piece: &Piece = match &tile.piece {
+                    None => return (),
                     Some(v) => v,
                 };
 
                 if piece.owner != self.players_turn {
-                    continue;
+                    return ();
                 }
 
                 let available_moves =
@@ -328,8 +329,8 @@ impl Board {
 
                 }
                 // println!();
-            }
-        });
+            });
+        }
 
         let best_move_score = match best_move_score {
             None => return Some(None),

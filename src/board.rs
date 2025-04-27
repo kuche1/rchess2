@@ -214,44 +214,58 @@ impl Board {
     }
 
     fn calc_move_score(&self, piece: &Option<Piece>, x_idx: usize, y_idx: usize, additional_think_breadth: i32, additional_think_depth: i32) -> Option<(i32, Vec<CompleteMove>)> {
-        { // parallel (WIP) // TODO0 remove that worthless scope, also we don't really need to pass the whole tile, just the piece
 
-            let piece: &Piece = match piece {
-                None => return None,
-                Some(v) => v,
-            };
+        let piece: &Piece = match piece {
+            None => return None,
+            Some(v) => v,
+        };
 
-            if piece.owner != self.players_turn {
-                return None;
-            }
+        if piece.owner != self.players_turn {
+            return None;
+        }
 
-            let mut best_move_score: Option<i32> = None;
-            let mut best_moves: Vec<CompleteMove> = vec![];
+        let mut best_move_score: Option<i32> = None;
+        let mut best_moves: Vec<CompleteMove> = vec![];
 
-            let available_moves =
-                self.get_available_moves_for(
-                    piece,
-                    x_idx, y_idx,
-                );
+        let available_moves =
+            self.get_available_moves_for(
+                piece,
+                x_idx, y_idx,
+            );
 
-            // print!("available moves for ");
-            // piece.draw();
-            // print!(":");
+        // print!("available moves for ");
+        // piece.draw();
+        // print!(":");
 
-            for movee in available_moves {
-                let (x, y) = movee;
-                // print!(" x={},y={}", x, y);
+        for movee in available_moves {
+            let (x, y) = movee;
+            // print!(" x={},y={}", x, y);
 
-                // println!("{}evaluating {},{}->{},{}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y);
-                
-                let mut virtual_board = self.clone();
-                virtual_board.non_virtual_board = false;
+            // println!("{}evaluating {},{}->{},{}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y);
             
-                let draw = virtual_board.commit_turn(x_idx, y_idx, x, y);
+            let mut virtual_board = self.clone();
+            virtual_board.non_virtual_board = false;
+        
+            let draw = virtual_board.commit_turn(x_idx, y_idx, x, y);
 
-                let score = 'score: {
+            let score = 'score: {
 
-                    if let Some(winner) = draw {
+                if let Some(winner) = draw {
+                    break 'score
+                        match winner {
+                            None => SCORE_IF_DRAW,
+                            Some(player) => {
+                                if player == piece.owner {
+                                    SCORE_IF_WIN
+                                }else{
+                                    SCORE_IF_LOOSE
+                                }
+                            },
+                        }
+                }
+
+                if additional_think_breadth > 0 {
+                    if let Some(winner) = virtual_board.play_turn(additional_think_breadth - 1, 0) {
                         break 'score
                             match winner {
                                 None => SCORE_IF_DRAW,
@@ -264,83 +278,67 @@ impl Board {
                                 },
                             }
                     }
+                }
 
-                    if additional_think_breadth > 0 {
-                        if let Some(winner) = virtual_board.play_turn(additional_think_breadth - 1, 0) {
+                let score = virtual_board.evaluate_score(piece.owner); // TODO2 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+
+                if additional_think_depth > 0 {
+                    if score > self.evaluate_score(piece.owner) { // TODO2 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
+                        if let Some(winner) = virtual_board.play_turn(0, additional_think_depth - 1) {
                             break 'score
-                                match winner {
-                                    None => SCORE_IF_DRAW,
-                                    Some(player) => {
-                                        if player == piece.owner {
-                                            SCORE_IF_WIN
-                                        }else{
-                                            SCORE_IF_LOOSE
-                                        }
-                                    },
-                                }
-                        }
-                    }
-
-                    let score = virtual_board.evaluate_score(piece.owner); // TODO2 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
-
-                    if additional_think_depth > 0 {
-                        if score > self.evaluate_score(piece.owner) { // TODO2 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
-                            if let Some(winner) = virtual_board.play_turn(0, additional_think_depth - 1) {
-                                break 'score
-                                match winner {
-                                    None => SCORE_IF_DRAW,
-                                    Some(player) => {
-                                        if player == piece.owner {
-                                            SCORE_IF_WIN
-                                        }else{
-                                            SCORE_IF_LOOSE
-                                        }
-                                    },
-                                }
+                            match winner {
+                                None => SCORE_IF_DRAW,
+                                Some(player) => {
+                                    if player == piece.owner {
+                                        SCORE_IF_WIN
+                                    }else{
+                                        SCORE_IF_LOOSE
+                                    }
+                                },
                             }
                         }
                     }
-
-                    score
-                };
-
-                // println!("{}move {},{}->{},{} evaluates to {}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y, score);
-
-                // match best_move_score {
-                //     None => {
-                //         best_move_score = Some(score);
-                //         best_moves.push((x_idx, y_idx, x, y));
-                //         // println!("{}this is my new fav move: first available", "    ".repeat(additional_think_depth as usize));
-                //     },
-                //     Some(val) => {
-                //         if val < score {
-                //             // println!("{}this is my new fav move: old({}) < new({})", "    ".repeat(additional_think_depth as usize), val, score);
-                //             best_move_score = Some(score);
-                //             // best_move = (x_idx, y_idx, x, y);
-                //             best_moves.clear();
-                //             best_moves.push((x_idx, y_idx, x, y));
-                //         }else if val == score {
-                //             best_moves.push((x_idx, y_idx, x, y));
-                //         }
-                //     },
-                // }
-
-                if best_move_score < Some(score) {
-                    best_move_score = Some(score);
-
-                    best_moves.clear();
-                    best_moves.push((x_idx, y_idx, x, y));
-
-                } else if best_move_score == Some(score) {
-                    best_moves.push((x_idx, y_idx, x, y));
                 }
 
+                score
+            };
+
+            // println!("{}move {},{}->{},{} evaluates to {}", "    ".repeat(additional_think_depth as usize), x_idx, y_idx, x, y, score);
+
+            // match best_move_score {
+            //     None => {
+            //         best_move_score = Some(score);
+            //         best_moves.push((x_idx, y_idx, x, y));
+            //         // println!("{}this is my new fav move: first available", "    ".repeat(additional_think_depth as usize));
+            //     },
+            //     Some(val) => {
+            //         if val < score {
+            //             // println!("{}this is my new fav move: old({}) < new({})", "    ".repeat(additional_think_depth as usize), val, score);
+            //             best_move_score = Some(score);
+            //             // best_move = (x_idx, y_idx, x, y);
+            //             best_moves.clear();
+            //             best_moves.push((x_idx, y_idx, x, y));
+            //         }else if val == score {
+            //             best_moves.push((x_idx, y_idx, x, y));
+            //         }
+            //     },
+            // }
+
+            if best_move_score < Some(score) {
+                best_move_score = Some(score);
+
+                best_moves.clear();
+                best_moves.push((x_idx, y_idx, x, y));
+
+            } else if best_move_score == Some(score) {
+                best_moves.push((x_idx, y_idx, x, y));
             }
 
-            match best_move_score {
-                None => None,
-                Some(score) => Some((score, best_moves))
-            }
+        }
+
+        match best_move_score {
+            None => None,
+            Some(score) => Some((score, best_moves))
 
         }
     }

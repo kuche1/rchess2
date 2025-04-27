@@ -18,6 +18,10 @@ const SCORE_IF_DRAW: i32 = -1;
 const SCORE_IF_WIN: i32 = 1_000_000;
 const SCORE_IF_LOOSE: i32 = -1_000_000;
 
+const PICK_RANDOM_MOVE_IF_MANY_AVAILABLE: bool = false;
+// `true` makes for better games
+// `false` makes for easier debugging
+
 type BoardPosition = [[Tile; BOARD_SIZE_USIZE]; BOARD_SIZE_USIZE];
 type CompleteMove = (usize, usize, usize, usize);
 
@@ -395,8 +399,14 @@ impl Board {
         };
 
         {
-            let (fx, fy, tx, ty) = overall_best_moves.choose(&mut rand::rng()).unwrap();
-            let (fx, fy, tx, ty) = (*fx, *fy, *tx, *ty);
+            let (fx, fy, tx, ty) = {
+                if PICK_RANDOM_MOVE_IF_MANY_AVAILABLE {
+                    let (fx, fy, tx, ty) = overall_best_moves.choose(&mut rand::rng()).unwrap();
+                    (*fx, *fy, *tx, *ty)
+                } else {
+                    overall_best_moves[0]
+                }
+            };
 
             if self.non_virtual_board {
                 self.players_turn.draw_color_on();

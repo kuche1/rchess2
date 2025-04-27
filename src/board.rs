@@ -213,10 +213,10 @@ impl Board {
         }
     }
 
-    fn calc_move_score(&self, tile: &Tile, x_idx: usize, y_idx: usize, additional_think_breadth: i32, additional_think_depth: i32) -> Option<(i32, Vec<CompleteMove>)> {
+    fn calc_move_score(&self, piece: &Option<Piece>, x_idx: usize, y_idx: usize, additional_think_breadth: i32, additional_think_depth: i32) -> Option<(i32, Vec<CompleteMove>)> {
         { // parallel (WIP) // TODO0 remove that worthless scope, also we don't really need to pass the whole tile, just the piece
 
-            let piece: &Piece = match &tile.piece {
+            let piece: &Piece = match piece {
                 None => return None,
                 Some(v) => v,
             };
@@ -360,15 +360,15 @@ impl Board {
                     lines
                     .par_iter()
                     .enumerate()
-                    .map( |(x_idx, tile)| self.calc_move_score(&tile, x_idx, y_idx, additional_think_breadth, additional_think_depth))
+                    .map( |(x_idx, tile)| self.calc_move_score(&tile.piece, x_idx, y_idx, additional_think_breadth, additional_think_depth))
                     .collect()
                 
                 } else { // the difference is that this one is not multithreaded
 
                     lines
-                    .iter()
+                    .iter() // TODO9 I really hate the fact that we have the exact same code in 2 places, with this being the only difference, but I don't think there is anything I can do // TODO0 actually, what if I just bind it to a function, then call that function
                     .enumerate()
-                    .map( |(x_idx, tile)| self.calc_move_score(&tile, x_idx, y_idx, additional_think_breadth, additional_think_depth))
+                    .map( |(x_idx, tile)| self.calc_move_score(&tile.piece, x_idx, y_idx, additional_think_breadth, additional_think_depth))
                     .collect()
 
                 }

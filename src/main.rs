@@ -13,6 +13,7 @@ mod piece;
 mod tile;
 
 use board::Board;
+use input::GameChoice;
 use player::Player;
 
 // the machine thinks about every of it's possible moves
@@ -37,23 +38,34 @@ fn main() {
     let mut board = Board::standard();
 
     loop {
+        println!();
         board.draw();
 
-        input::enter();
+        // input::enter();
 
-        let winner = board.play_turn(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
+        match input::game_choice() {
 
-        println!();
+            GameChoice::NextTurnAi => {
 
-        if let Some(winner) = winner {
-            board.draw();
-            // println!("winner: {}", winner);
-            match winner {
-                None => println!("draw"),
-                Some(Player::A) => println!("winner: player a"),
-                Some(Player::B) => println!("winner: player b"),
-            }
-            break;
+                let winner = board.play_turn(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
+        
+                if let Some(winner) = winner {
+                    board.draw();
+                    // println!("winner: {}", winner);
+                    match winner {
+                        None => println!("draw"),
+                        Some(Player::A) => println!("winner: player a"),
+                        Some(Player::B) => println!("winner: player b"),
+                    }
+                    break;
+                }
+
+            },
+
+            GameChoice::MovePiece => {
+                println!("todo, implement piece move");
+            },
         }
+
     }
 }

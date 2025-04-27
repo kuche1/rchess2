@@ -1,5 +1,6 @@
 
-// TODO0 the bots are now wasting time on worthless moves
+// TODO1? maybe add something that makes the bot consider a play even if it doesn't change the score
+// TODO0 allow the end user to play moves
 
 // run with:
 // cargo run --release

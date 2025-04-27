@@ -214,7 +214,6 @@ impl Board {
 
     pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
         let mut best_move_score: Option<i32> = None;
-        // let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
         let mut best_moves: Vec<(usize, usize, usize, usize)> = vec![];
 
         // for (y_idx, lines) in self.board.iter().enumerate() { // sequantial

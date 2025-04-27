@@ -217,7 +217,8 @@ impl Board {
         // let mut best_move: (usize, usize, usize, usize) = (0, 0, 0, 0);
         let mut best_moves: Vec<(usize, usize, usize, usize)> = vec![];
 
-        for (y_idx, lines) in self.board.iter().enumerate() {
+        // for (y_idx, lines) in self.board.iter().enumerate() { // sequantial
+        self.board.iter().enumerate().for_each(|(y_idx, lines)| { // parallel (WIP)
             for (x_idx, tile) in lines.iter().enumerate() {
 
                 let piece = match &tile.piece {
@@ -329,7 +330,7 @@ impl Board {
                 }
                 // println!();
             }
-        }
+        });
 
         let best_move_score = match best_move_score {
             None => return Some(None),

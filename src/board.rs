@@ -18,7 +18,7 @@ const SCORE_IF_DRAW: i32 = -1;
 const SCORE_IF_WIN: i32 = 1_000_000;
 const SCORE_IF_LOOSE: i32 = -1_000_000;
 
-const PICK_RANDOM_MOVE_IF_MANY_AVAILABLE: bool = false;
+const PICK_RANDOM_MOVE_IF_MANY_AVAILABLE: bool = true;
 // `true` makes for better games
 // `false` makes for easier debugging
 

@@ -1,6 +1,7 @@
 
 // TODO1? maybe add something that makes the bot consider a play even if it doesn't change the score
 // TODO0 allow the end user to play moves
+// TODO1? maybe give checks 0.5 points, or at least make them extend the thinking
 
 // run with:
 // cargo run --release

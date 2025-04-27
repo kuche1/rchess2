@@ -272,10 +272,10 @@ impl Board {
                             }
                         }
 
-                        let score = virtual_board.evaluate_score(piece.owner); // TODO1 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
+                        let score = virtual_board.evaluate_score(piece.owner); // TODO2 maybe keep a variable `score`, then only updates it, but then again this will break multiplayer chess
 
                         if additional_think_depth > 0 {
-                            if score > self.evaluate_score(piece.owner) { // TODO1 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
+                            if score > self.evaluate_score(piece.owner) { // TODO2 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
                                 if let Some(winner) = virtual_board.play_turn(additional_think_depth - 1, 0) {
                                     break 'score
                                     match winner {
@@ -438,7 +438,18 @@ impl Board {
                     available_moves.push((x_idx, new_y));
 
                     // move forward twice (will only trigger if you can also move forward once)
-                    // TODO1 I actually need to fucking check if the position is right (the pawn has not moved)
+
+                    { // check if pawn is at start pos
+
+                        let pos_y = match piece.owner {
+                            Player::A => BOARD_SIZE_USIZE - 1 - 1,
+                            Player::B => 0                    + 1,
+                        };
+
+                        if y_idx != pos_y {
+                            break 'pawn_move;
+                        }
+                    }
 
                     let new_y = match new_y.checked_add_signed(forward_y) {
                         Some(v) => v,

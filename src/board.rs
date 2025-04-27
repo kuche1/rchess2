@@ -1,5 +1,6 @@
 
 use rand::seq::IndexedRandom; // cargo add rand
+use rayon::prelude::*; // cargo add rayon
 
 use super::player::Player;
 use super::piece_type::PieceType;

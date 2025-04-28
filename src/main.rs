@@ -65,7 +65,12 @@ fn main() {
             },
 
             GameChoice::MovePiece => {
-                println!("todo, implement piece move");
+                let from_x: usize = input::position("move from x: ");
+                let from_y: usize = input::position("move from y: ");
+                let to_x: usize = input::position("move to x: ");
+                let to_y: usize = input::position("move to y: ");
+
+                board.human_play_turn((from_x, from_y, to_x, to_y));
             },
         }
 

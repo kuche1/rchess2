@@ -7,7 +7,7 @@ use super::piece_type::PieceType;
 use super::piece::Piece;
 use super::tile::Tile;
 
-const BOARD_SIZE_USIZE: usize = 8;
+pub const BOARD_SIZE_USIZE: usize = 8;
 // const BOARD_SIZE_ISIZE: isize = BOARD_SIZE_USIZE as isize;
 
 const SCORE_IF_DRAW: i32 = -1;
@@ -126,13 +126,20 @@ impl Board {
     }
 
     pub fn draw(&self) {
-        for lines in &self.board {
+        for (y, lines) in self.board.iter().enumerate() {
+            print!("{y}");
             for tile in lines {
                 print!("|");
                 tile.draw();
             }
             println!("|");
         }
+
+        print!(" ");
+        for (y, _lines) in self.board.iter().enumerate() {
+            print!("|{y}");
+        }
+        println!("|");
     }
 
     fn evaluate_score(&self, forr: Player) -> i32 {
@@ -697,5 +704,10 @@ impl Board {
         }
 
         available_moves
+    }
+
+    pub fn human_play_turn(&mut self, movee: CompleteMove) {
+        let (from_x, from_y, to_x, to_y) = movee; // TODO1 fucking bad (no sanity check)
+        self.commit_turn(from_x, from_y, to_x, to_y);
     }
 }

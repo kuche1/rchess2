@@ -1,7 +1,11 @@
 
 use std::io;
 use std::io::Write;
+use std::collections::HashMap;
 
+use super::board::BOARD_SIZE_USIZE;
+
+#[derive(Clone, Copy, Debug)]
 pub enum GameChoice {
     NextTurnAi,
     MovePiece,
@@ -14,6 +18,16 @@ pub enum GameChoice {
 // }
 
 pub fn game_choice() -> GameChoice {
+    let commands = HashMap::from([
+        ("", GameChoice::NextTurnAi),
+        ("ai", GameChoice::NextTurnAi),
+        ("auto-play-next-turn", GameChoice::NextTurnAi),
+        ("pc", GameChoice::NextTurnAi),
+
+        ("move", GameChoice::MovePiece),
+        ("m", GameChoice::MovePiece),
+    ]);
+
     loop {
         print!("> ");
         io::stdout().flush().unwrap();
@@ -22,10 +36,41 @@ pub fn game_choice() -> GameChoice {
         let _ = io::stdin().read_line(&mut line).unwrap();
         let line = line.trim();
 
-        match line {
-            "ai" | "" => return GameChoice::NextTurnAi,
-            "move" => return GameChoice::MovePiece,
-            _ => println!("invalid choice"),
+        match commands.get(line) {
+            None => {
+                println!("invalid choice: {line}");
+                println!("commands:");
+                for (cmd, act) in &commands {
+                    println!("    `{cmd}` => {act:#?}");
+                }
+            },
+            Some(action) => return *action,
         }
+
+    }
+}
+
+pub fn position(prompt: &str) -> usize { // kinda stupid name
+    loop {
+        print!("{prompt}");
+        io::stdout().flush().unwrap();
+
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).unwrap();
+
+        let pos = match input.trim().parse::<usize>() {
+            Err(_e) => {
+                println!("invalid position");
+                continue;
+            },
+            Ok(v) => v,
+        };
+
+        if pos >= BOARD_SIZE_USIZE {
+            println!("too high");
+            continue;
+        };
+
+        return pos;
     }
 }

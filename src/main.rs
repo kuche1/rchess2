@@ -22,7 +22,7 @@ use player::Player;
 // then picks the onces that result in the most points
 // then picks a random one out of them
 
-const ADDITIONAL_THINK_BREADTH: i32 = 2;
+const ADDITIONAL_THINK_BREADTH: i32 = 3;
 // the machine will consider all available positions for it's next turn
 // if this is 1, then it will consider all of the opponent's responses to each of the available turns
 // if this is 2, then it will consoder all avaiable ...

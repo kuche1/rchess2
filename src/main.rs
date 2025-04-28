@@ -43,8 +43,6 @@ fn main() {
         println!();
         board.draw();
 
-        // input::enter();
-
         match input::game_choice() {
 
             GameChoice::NextTurnAi => {

@@ -302,7 +302,7 @@ impl Board {
                 }
 
                 if additional_think_breadth > 0 {
-                    if let Some(winner) = virtual_board.play_turn(additional_think_breadth - 1, 0) {
+                    if let Some(winner) = virtual_board.play_turn_bot(additional_think_breadth - 1, 0) {
                         break 'score
                             match winner {
                                 None => SCORE_IF_DRAW,
@@ -321,7 +321,7 @@ impl Board {
 
                 if additional_think_depth > 0 {
                     if score > self.evaluate_score(piece.owner) { // TODO2 yeah, I'm not sure I like having to recalc this every time, I think the comment above is right
-                        if let Some(winner) = virtual_board.play_turn(0, additional_think_depth - 1) {
+                        if let Some(winner) = virtual_board.play_turn_bot(0, additional_think_depth - 1) {
                             break 'score
                             match winner {
                                 None => SCORE_IF_DRAW,
@@ -380,7 +380,7 @@ impl Board {
         }
     }
 
-    pub fn play_turn(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
+    pub fn play_turn_bot(&mut self, additional_think_breadth: i32, additional_think_depth: i32) -> Option<Option<Player>> {
 
         let mut overall_best_score: Option<i32> = None;
         let mut overall_best_moves: Vec<CompleteMove> = vec![];

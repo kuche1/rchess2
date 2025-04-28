@@ -47,7 +47,7 @@ fn main() {
 
             GameChoice::NextTurnAi => {
 
-                let winner = board.play_turn(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
+                let winner = board.play_turn_bot(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
         
                 if let Some(winner) = winner {
                     board.draw();

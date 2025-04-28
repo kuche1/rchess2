@@ -65,7 +65,7 @@ fn main() {
             GameChoice::MovePiece => {
                 let (from_x, from_y) = input::position("move from xy: ");
                 let (to_x, to_y) = input::position("move to xy: ");
-                board.human_play_turn((from_x, from_y, to_x, to_y));
+                board.play_turn_human((from_x, from_y, to_x, to_y));
             },
         }
 

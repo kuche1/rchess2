@@ -43,30 +43,27 @@ fn main() {
         println!();
         board.draw();
 
-        match input::game_choice() {
+        let winner = match input::game_choice() {
 
             GameChoice::PlayTurnBot => {
-
-                let winner = board.play_turn_bot(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
-        
-                if let Some(winner) = winner {
-                    board.draw();
-                    // println!("winner: {}", winner);
-                    match winner {
-                        None => println!("draw"),
-                        Some(Player::A) => println!("winner: player a"),
-                        Some(Player::B) => println!("winner: player b"),
-                    }
-                    break;
-                }
-
+                board.play_turn_bot(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH)
             },
 
-            GameChoice::MovePiece => {
+            GameChoice::PlayTurnHuman => {
                 let (from_x, from_y) = input::position("move from xy: ");
                 let (to_x, to_y) = input::position("move to xy: ");
-                board.play_turn_human((from_x, from_y, to_x, to_y));
+                board.play_turn_human((from_x, from_y, to_x, to_y))
             },
+        };
+
+        if let Some(winner) = winner {
+            board.draw();
+            match winner {
+                None => println!("draw"),
+                Some(Player::A) => println!("winner: player a"),
+                Some(Player::B) => println!("winner: player b"),
+            }
+            break;
         }
 
     }

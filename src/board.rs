@@ -734,8 +734,8 @@ impl Board {
         available_moves
     }
 
-    pub fn play_turn_human(&mut self, movee: CompleteMove) {
+    pub fn play_turn_human(&mut self, movee: CompleteMove) -> Option<Option<Player>> {
         let (from_x, from_y, to_x, to_y) = movee; // TODO1 fucking bad (no sanity check)
-        self.commit_turn(from_x, from_y, to_x, to_y);
+        self.commit_turn(from_x, from_y, to_x, to_y)
     }
 }

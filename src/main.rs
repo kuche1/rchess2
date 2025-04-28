@@ -45,7 +45,7 @@ fn main() {
 
         match input::game_choice() {
 
-            GameChoice::NextTurnAi => {
+            GameChoice::PlayTurnBot => {
 
                 let winner = board.play_turn_bot(ADDITIONAL_THINK_BREADTH, ADDITIONAL_THINK_DEPTH);
         

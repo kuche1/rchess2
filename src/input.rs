@@ -7,7 +7,7 @@ use super::board::BOARD_SIZE_USIZE;
 
 #[derive(Clone, Copy, Debug)]
 pub enum GameChoice {
-    NextTurnAi,
+    PlayTurnBot,
     MovePiece,
 }
 
@@ -19,10 +19,10 @@ pub enum GameChoice {
 
 pub fn game_choice() -> GameChoice {
     let commands = HashMap::from([
-        ("b", GameChoice::NextTurnAi),
-        ("ai", GameChoice::NextTurnAi),
-        ("auto-play-next-turn", GameChoice::NextTurnAi),
-        ("pc", GameChoice::NextTurnAi),
+        ("b", GameChoice::PlayTurnBot),
+        ("ai", GameChoice::PlayTurnBot),
+        ("auto-play-next-turn", GameChoice::PlayTurnBot),
+        ("pc", GameChoice::PlayTurnBot),
 
         ("move", GameChoice::MovePiece),
         ("m", GameChoice::MovePiece),

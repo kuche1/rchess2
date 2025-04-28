@@ -127,19 +127,45 @@ impl Board {
 
     pub fn draw(&self) { // TODO make every second square darker
         for (y, lines) in self.board.iter().enumerate() {
-            print!("{y}");
-            for tile in lines {
-                print!("|");
+            print!("{y} ");
+            for (tile_idx, tile) in lines.iter().enumerate() {
+
+                // I hate this
+                // this super sucks
+                // TODO8
+
+                if tile_idx % 2 != y % 2 {
+                    tile.draw_black_background_on();
+                }else{
+                    tile.draw_white_background_on();
+                }
+
+                print!(" ");
+
                 tile.draw();
+
+                if tile_idx % 2 != y % 2 {
+                    tile.draw_black_background_on();
+                }else{
+                    tile.draw_white_background_on();
+                }
+
+                print!(" ");
+                
+                if tile_idx % 2 != y % 2 {
+                    tile.draw_black_background_off();
+                }else{
+                    tile.draw_white_background_off();
+                }
             }
-            println!("|");
+            println!("");
         }
 
-        print!(" ");
+        print!("  ");
         for (y, _lines) in self.board.iter().enumerate() {
-            print!("|{y}");
+            print!(" {y} ");
         }
-        println!("|");
+        println!();
     }
 
     fn evaluate_score(&self, forr: Player) -> i32 {

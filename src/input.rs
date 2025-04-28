@@ -51,7 +51,7 @@ pub fn game_choice() -> GameChoice {
 }
 
 // TODO0 I want to enter `30` and not 3<enter>0<enter>
-pub fn position(prompt: &str) -> usize { // kinda stupid name
+pub fn position(prompt: &str) -> (usize, usize) { // kinda stupid name
     loop {
         print!("{prompt}");
         io::stdout().flush().unwrap();
@@ -67,11 +67,14 @@ pub fn position(prompt: &str) -> usize { // kinda stupid name
             Ok(v) => v,
         };
 
-        if pos >= BOARD_SIZE_USIZE {
+        let x = pos / 10;
+        let y = pos % 10;
+
+        if (x >= BOARD_SIZE_USIZE) || (y >= BOARD_SIZE_USIZE) {
             println!("too high");
             continue;
         };
 
-        return pos;
+        return (x, y);
     }
 }

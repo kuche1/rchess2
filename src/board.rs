@@ -734,7 +734,7 @@ impl Board {
         available_moves
     }
 
-    pub fn play_turn_human(&mut self, movee: CompleteMove) -> Option<Option<Player>> {
+    pub fn play_turn_human(&mut self, movee: CompleteMove) -> Option<Option<Player>> { // TODO1 rename to `play_turn_god` or something like that, or just `move_piece` and don't switch turns
         let (from_x, from_y, to_x, to_y) = movee; // TODO1 fucking bad (no sanity check)
         self.commit_turn(from_x, from_y, to_x, to_y)
     }

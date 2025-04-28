@@ -125,7 +125,7 @@ impl Board {
         }
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&self) { // TODO make every second square darker
         for (y, lines) in self.board.iter().enumerate() {
             print!("{y}");
             for tile in lines {
@@ -592,6 +592,8 @@ impl Board {
 
                     available_moves.push((dest_x, dest_y));
                 }
+
+                // TODO1 castle
 
             },
 

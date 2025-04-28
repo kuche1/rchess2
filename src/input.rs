@@ -19,13 +19,15 @@ pub enum GameChoice {
 
 pub fn game_choice() -> GameChoice {
     let commands = HashMap::from([
-        ("", GameChoice::NextTurnAi),
+        ("b", GameChoice::NextTurnAi),
         ("ai", GameChoice::NextTurnAi),
         ("auto-play-next-turn", GameChoice::NextTurnAi),
         ("pc", GameChoice::NextTurnAi),
 
         ("move", GameChoice::MovePiece),
         ("m", GameChoice::MovePiece),
+        ("human", GameChoice::MovePiece),
+        ("h", GameChoice::MovePiece),
     ]);
 
     loop {

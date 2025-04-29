@@ -45,7 +45,6 @@ pub fn game_choice() -> GameChoice {
     }
 }
 
-// TODO0 I want to enter `30` and not 3<enter>0<enter>
 pub fn position(prompt: &str) -> (usize, usize) { // kinda stupid name
     loop {
         print!("{prompt}");
